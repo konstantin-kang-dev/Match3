@@ -1,21 +1,18 @@
+using Game;
 using UnityEngine;
-using Zenject;
+using VContainer;
+using VContainer.Unity;
 
-public class SceneInstaller : MonoInstaller
+public class SceneInstaller: LifetimeScope
 {
     [SerializeField] PlayfieldItemsContentManager _playfieldItemsContentManager;
-    [SerializeField] GameManager _gameManager;
     [SerializeField] GridManager _gridManager;
-    [SerializeField] PlayfieldManager _playfieldManager; 
 
-    public override void InstallBindings()
+    protected override void Configure(IContainerBuilder builder)
     {
-        Container.Bind<PlayfieldItemsContentManager>().FromInstance(_playfieldItemsContentManager).AsSingle();
-        Container.Bind<GameManager>().FromInstance(_gameManager).AsSingle();
-        Container.Bind<GridManager>().FromInstance(_gridManager).AsSingle();
-        Container.Bind<PlayfieldManager>().FromInstance(_playfieldManager).AsSingle();
-
-        Container.Bind<GameProgressionManager>().AsSingle();
-
+        builder.RegisterInstance(_gridManager);
+        builder.RegisterInstance(_playfieldItemsContentManager);
+        builder.Register<GameManager>(Lifetime.Singleton);
+        builder.Register<PlayfieldManager>(Lifetime.Singleton);
     }
 }

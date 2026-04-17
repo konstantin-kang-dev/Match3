@@ -1,13 +1,19 @@
 using UnityEngine;
-using Zenject;
 
-public class GameManager : MonoBehaviour
+namespace Game
 {
-    [Inject]
-    PlayfieldManager _playfieldManager;
-
-    public void Init()
+    public partial class GameManager
     {
-        _playfieldManager.Init();
+        readonly PlayfieldManager _playfieldManager;
+
+        public GameManager(PlayfieldManager playfieldManager)
+        {
+            _playfieldManager = playfieldManager;
+        }
+
+        public void Init()
+        {
+            _playfieldManager.Init();
+        }
     }
 }

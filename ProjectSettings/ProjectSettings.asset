@@ -946,7 +946,7 @@ PlayerSettings:
   cloudProjectId: 0da6c851-0e54-45ce-a1c3-35c754ebc970
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: My project
+  projectName: Match3
   organizationId: kangdev
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
