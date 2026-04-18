@@ -7,16 +7,20 @@ namespace Game
     public class PlayfieldItemPresenter
     {
         public PlayfieldItemModel Model { get; private set;  }
+        public PlayfieldItemVisuals Visuals { get; private set; }
 
         public PlayfieldItemPresenter()
         {
 
         }
 
-        public void Init(PlayfieldItemConfig config)
+        public void Init(PlayfieldItemConfig config, PlayfieldItemVisuals visuals)
         {
-            Model.Init(config);
-        }
+            Model = new PlayfieldItemModel();
+            Visuals = visuals;
 
+            Model.Init(config);
+            Visuals.Init(config);
+        }
     }
 }

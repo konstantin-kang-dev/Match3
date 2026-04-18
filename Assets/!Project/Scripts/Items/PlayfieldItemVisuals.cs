@@ -1,4 +1,5 @@
-﻿using Game;
+﻿using DG.Tweening;
+using Game;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,14 +10,25 @@ using Utils;
 
 public class PlayfieldItemVisuals: MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    PlayfieldItemPresenter _presenter;
+    RectTransform _rectTransform;
     [SerializeField] Image _icon;
 
     Vector2 _dragStartPos = Vector2.zero;
-    public void Init(PlayfieldItemPresenter playfieldItemPresenter, PlayfieldItemConfig config)
+    public void Init(PlayfieldItemConfig config)
     {
-        _presenter = playfieldItemPresenter;
+        _rectTransform = GetComponent<RectTransform>();
         _icon.sprite = config.Icon;
+    }
+
+    public void MoveTo(Vector2 targetPos, bool doInstantly = false)
+    {
+        if (doInstantly)
+        {
+            _rectTransform.anchoredPosition = targetPos;
+            return;
+        }
+
+        _rectTransform.DOLocalMove(targetPos, 1f);
     }
 
 

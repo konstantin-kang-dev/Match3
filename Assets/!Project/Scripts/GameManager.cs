@@ -2,18 +2,21 @@ using UnityEngine;
 
 namespace Game
 {
-    public partial class GameManager
+    public class GameManager
     {
         readonly PlayfieldManager _playfieldManager;
-
-        public GameManager(PlayfieldManager playfieldManager)
+        readonly PlayfieldItemsDB _playfieldItemsDB;
+        public GameManager(PlayfieldManager playfieldManager, PlayfieldItemsDB itemsDB)
         {
             _playfieldManager = playfieldManager;
+            _playfieldItemsDB = itemsDB;
         }
 
         public void Init()
         {
+            _playfieldItemsDB.Init();
             _playfieldManager.Init();
+            Debug.Log($"[GameManager] Initialized.");
         }
     }
 }

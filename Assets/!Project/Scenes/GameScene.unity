@@ -249,13 +249,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 395526551}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1464466, y: 0.8535535, z: -0.35355338, w: 0.35355338}
-  m_LocalPosition: {x: -7, y: 25, z: 7}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45, y: 135, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &395526555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -502,37 +502,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961981915}
   m_CullTransparentMesh: 1
---- !u!1 &1569862912
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1569862914}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1569862914
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1569862912}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1631596253
 GameObject:
   m_ObjectHideFlags: 0
@@ -740,6 +709,7 @@ MonoBehaviour:
   - {fileID: 278808342}
   _playfieldItemsContentManager: {fileID: 1745835974}
   _gridManager: {fileID: 2062787005}
+  _playfieldItemVisualsPrefab: {fileID: 5613670052034881416, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
 --- !u!1 &1963982010
 GameObject:
   m_ObjectHideFlags: 0
@@ -808,9 +778,9 @@ Canvas:
   m_GameObject: {fileID: 1963982010}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_RenderMode: 1
+  m_Camera: {fileID: 395526553}
+  m_PlaneDistance: 0
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -892,7 +862,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
   <CellSize>k__BackingField: {x: 220, y: 220}
-  <GridSize>k__BackingField: {x: 0, y: 0}
+  <GridSize>k__BackingField: {x: 5, y: 9}
+  <Canvas>k__BackingField: {fileID: 1963982013}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -901,7 +872,6 @@ SceneRoots:
   - {fileID: 849062369}
   - {fileID: 1668112421}
   - {fileID: 1963982014}
-  - {fileID: 1569862914}
   - {fileID: 278808344}
   - {fileID: 1745835975}
   - {fileID: 1631596254}
