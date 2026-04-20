@@ -1,4 +1,5 @@
-﻿using System;
+﻿using R3;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace Game
     {
         public PlayfieldItemType Type { get; private set; }
         public Vector2Int OccupiedCell { get; private set; }
+
         public void Init(PlayfieldItemConfig config)
         {
             Type = config.ItemType;

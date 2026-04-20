@@ -1,26 +1,66 @@
+using R3;
+using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using Utils;
 
 namespace Game
 {
-    public class PlayfieldItemPresenter
+    public class PlayfieldItemPresenter : IDisposable
     {
         public PlayfieldItemModel Model { get; private set;  }
-        public PlayfieldItemVisuals Visuals { get; private set; }
+        public PlayfieldItemView View { get; private set; }
 
-        public PlayfieldItemPresenter()
+        PlayfieldManager _playfieldManager;
+        GridManager _gridManager;
+        public PlayfieldItemPresenter(PlayfieldManager playfieldManager, GridManager gridManager)
         {
+            _playfieldManager = playfieldManager;
+            _gridManager = gridManager;
+        }
+
+        public void Init(PlayfieldItemConfig config, PlayfieldItemView visuals)
+        {
+            Model = new PlayfieldItemModel();
+            View = visuals;
+
+            Model.Init(config);
+            View.Init(config);
+
+            View.OnSwapRequest.Subscribe((Vector2Int direction) =>
+            {
+                HandleSwapRequest(direction);
+            });
+
+            View.OnDestroyed.Subscribe(isDestroyed =>
+            {
+                Dispose();
+            });
+        }
+
+        void HandleSwapRequest(Vector2Int direction)
+        {
+            _playfieldManager.TrySwap(Model.OccupiedCell, direction);
+        }
+
+        public void OccupyCell(Vector2Int nextCell, bool animate = false)
+        {
+            Model.OccupyCell(nextCell);
+
+            if(animate)
+            {
+                Vector2 targetPos = _gridManager.GetPositionForCell(nextCell);
+                View.MoveTo(targetPos, 0.25f);
+            }
 
         }
 
-        public void Init(PlayfieldItemConfig config, PlayfieldItemVisuals visuals)
+        public void DestroyItem()
         {
-            Model = new PlayfieldItemModel();
-            Visuals = visuals;
+            View.AnimateDestroy();
+        }
 
-            Model.Init(config);
-            Visuals.Init(config);
+        public void Dispose()
+        {
+
         }
     }
 }

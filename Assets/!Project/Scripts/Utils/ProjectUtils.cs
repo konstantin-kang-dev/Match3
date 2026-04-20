@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Utils
 {
@@ -13,6 +15,13 @@ namespace Utils
                 return delta.x > 0 ? Vector2Int.right : Vector2Int.left;
             else
                 return delta.y > 0 ? Vector2Int.up : Vector2Int.down;
+        }
+
+        public static PlayfieldItemType GetRandomPlayfieldItemType()
+        {
+            var values = Enum.GetValues(typeof(PlayfieldItemType));
+            var random = (PlayfieldItemType)values.GetValue(Random.Range(1, values.Length));
+            return random;
         }
     }
 }

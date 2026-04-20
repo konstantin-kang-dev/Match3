@@ -6,15 +6,18 @@ namespace Game
     {
         readonly PlayfieldManager _playfieldManager;
         readonly PlayfieldItemsDB _playfieldItemsDB;
-        public GameManager(PlayfieldManager playfieldManager, PlayfieldItemsDB itemsDB)
+        readonly GridManager _gridManager;
+        public GameManager(PlayfieldManager playfieldManager, PlayfieldItemsDB itemsDB, GridManager gridManager)
         {
             _playfieldManager = playfieldManager;
             _playfieldItemsDB = itemsDB;
+            _gridManager = gridManager;
         }
 
         public void Init()
         {
             _playfieldItemsDB.Init();
+            _gridManager.Init();
             _playfieldManager.Init();
             Debug.Log($"[GameManager] Initialized.");
         }
