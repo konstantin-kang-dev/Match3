@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -20,8 +21,17 @@ namespace Utils
         public static PlayfieldItemType GetRandomPlayfieldItemType()
         {
             var values = Enum.GetValues(typeof(PlayfieldItemType));
-            var random = (PlayfieldItemType)values.GetValue(Random.Range(1, values.Length));
+            var random = (PlayfieldItemType)values.GetValue(Random.Range(0, values.Length));
             return random;
+        }
+        public static PlayfieldItemType GetRandomPlayfieldItemTypeExcluding(HashSet<PlayfieldItemType> forbidden)
+        {
+            var available = System.Enum.GetValues(typeof(PlayfieldItemType))
+                .Cast<PlayfieldItemType>()
+                .Where(t => !forbidden.Contains(t))
+                .ToList();
+
+            return available[Random.Range(0, available.Count)];
         }
     }
 }

@@ -6,7 +6,6 @@ using UnityEngine;
 [Serializable]
 public enum PlayfieldItemType
 {
-    None = 0,
     CommonRed = 1,
     CommonBlue = 2,
     CommonGreen = 3,

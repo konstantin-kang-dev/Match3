@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -6,6 +7,13 @@ public class GridManager : MonoBehaviour
     [field: SerializeField] public Vector2 CellSize {  get; private set; }
     [field: SerializeField] public Vector2Int GridSize { get; private set; }
     [field: SerializeField] public Canvas Canvas { get; private set; }
+
+    [Header("Grid cells")]
+    [SerializeField] Transform _gridCellsContainer;
+    [SerializeField] GridCell _cellPrefab;
+    [SerializeField] Color _cellOddColor;
+    [SerializeField] Color _cellEvenColor;
+    List<GridCell> _gridCells = new List<GridCell>();
 
     HashSet<Vector2Int> _validCells = new HashSet<Vector2Int>();
 
@@ -17,6 +25,30 @@ public class GridManager : MonoBehaviour
             {
                 _validCells.Add(new Vector2Int(x, y));
             }
+        }
+
+        SpawnCells();
+    }
+
+    [ContextMenu("Regenerate grid cells")]
+    void SpawnCells()
+    {
+        foreach (var gridCell in _gridCells)
+        {
+            Destroy(gridCell.gameObject);
+        }
+        _gridCells.Clear();
+        List<Vector2Int> cells = _validCells.ToList();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            bool isEven = i % 2 == 0;
+            Vector2Int cell = cells[i];
+            Vector2 pos = GetPositionForCell(cell);
+
+            GridCell gridCell = Instantiate(_cellPrefab, _gridCellsContainer);
+            gridCell.SetColor(isEven ? _cellEvenColor : _cellOddColor);
+            gridCell.transform.localPosition = pos;
+            _gridCells.Add(gridCell);
         }
     }
 

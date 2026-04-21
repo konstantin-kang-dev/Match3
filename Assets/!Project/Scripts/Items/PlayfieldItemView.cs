@@ -22,7 +22,7 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
         _icon.sprite = config.Icon;
     }
 
-    public void MoveTo(Vector2 targetPos, float time = 1f, bool doInstantly = false)
+    public void MoveTo(Vector2 targetPos, float time = 0.5f, bool doInstantly = false)
     {
         if (doInstantly)
         {
@@ -30,7 +30,7 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
             return;
         }
 
-        _rectTransform.DOLocalMove(targetPos, time);
+        _rectTransform.DOAnchorPos(targetPos, time);
     }
 
     public void AnimateDestroy()

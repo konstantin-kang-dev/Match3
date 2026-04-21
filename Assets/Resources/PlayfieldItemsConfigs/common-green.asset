@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayfieldItemConfig
   ItemType: 3
   ScoreWeight: 1
-  Icon: {fileID: 21300000, guid: 9a83924ecb72a474d8bea8c2425448d6, type: 3}
+  Icon: {fileID: 21300000, guid: 7d55f295cb825fa4ba68c47b954f2632, type: 3}

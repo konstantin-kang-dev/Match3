@@ -38,6 +38,7 @@ namespace Game
 
         void HandleSwapRequest(Vector2Int direction)
         {
+            if (_playfieldManager.IsMatching) return;
             _playfieldManager.TrySwap(Model.OccupiedCell, direction);
         }
 
