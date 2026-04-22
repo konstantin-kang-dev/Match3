@@ -6,11 +6,11 @@ using UnityEngine;
 [Serializable]
 public enum PlayfieldItemType
 {
-    CommonRed = 1,
-    CommonBlue = 2,
-    CommonGreen = 3,
-    CommonPink = 4,
-    CommonYellow = 5,
+    ItemMilk = 1,
+    ItemApple = 2,
+    ItemLemon = 3,
+    ItemCoconut = 4,
+    ItemBroccoli = 5,
 }
 
 [Serializable, CreateAssetMenu(fileName = "PlayfieldItemConfig", menuName = "GameContent/PlayfieldItemConfig")]
@@ -19,4 +19,5 @@ public class PlayfieldItemConfig: ScriptableObject
     public PlayfieldItemType ItemType;
     public float ScoreWeight;
     public Sprite Icon;
+    public GameObject Prefab;
 }

@@ -9,23 +9,21 @@ namespace Game
     public class PlayfieldItemsFactory
     {
         readonly IObjectResolver _resolver;
-        readonly PlayfieldItemView _playfieldItemVisuals;
         readonly PlayfieldItemsDB _playfieldItemsDB;
 
-        public PlayfieldItemsFactory(IObjectResolver resolver, PlayfieldItemView visualsPrefab, PlayfieldItemsDB itemsDB)
+        public PlayfieldItemsFactory(IObjectResolver resolver, PlayfieldItemsDB itemsDB)
         {
             _resolver = resolver;
-            _playfieldItemVisuals = visualsPrefab;
             _playfieldItemsDB = itemsDB;
         }
 
         public PlayfieldItemPresenter SpawnItem(PlayfieldItemType itemType, Transform parent)
         {
             PlayfieldItemConfig config = _playfieldItemsDB.GetConfigByType(itemType);
-            PlayfieldItemView visuals = GameObject.Instantiate(_playfieldItemVisuals, parent);
+            PlayfieldItemView view = GameObject.Instantiate(config.Prefab, parent).GetComponent<PlayfieldItemView>();
 
             var presenter = _resolver.Resolve<PlayfieldItemPresenter>();
-            presenter.Init(config, visuals);
+            presenter.Init(config, view);
             return presenter;
         }
     }

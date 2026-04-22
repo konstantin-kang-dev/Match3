@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 736ec1bebd63cf74c8f7b59c964a0fe8, type: 3}
-  m_Name: common-yellow
+  m_Name: item-coconut
   m_EditorClassIdentifier: Assembly-CSharp::PlayfieldItemConfig
-  ItemType: 5
+  ItemType: 4
   ScoreWeight: 1
-  Icon: {fileID: 21300000, guid: a859dd37dff7d1e4e983878532d4b918, type: 3}
+  Icon: {fileID: 21300000, guid: 4770bd6ce7eb77144a29cbcccf9b3cf8, type: 3}
+  Prefab: {fileID: 6179968948113666286, guid: 93f413b7c37270e47843b32bb79a1214, type: 3}

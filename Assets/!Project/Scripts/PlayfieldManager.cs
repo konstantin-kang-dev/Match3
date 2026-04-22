@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Utils;
 
@@ -16,6 +18,7 @@ namespace Game
         Subject<List<Vector2Int>> OnSwapProcessed = new Subject<List<Vector2Int>>();
 
         public bool IsMatching { get; private set; } = false;
+        public bool AreColumnsReady { get; private set; } = false;
 
         Vector2Int _lastSwapFrom;
         Vector2Int _lastSwapTo;
@@ -122,9 +125,9 @@ namespace Game
                     ProcessMatch(matches);
                     await UniTask.WaitForSeconds(0.3f);
 
-                    CollapseColumns();
+                    await CollapseColumns();
 
-                    await UniTask.WaitForSeconds(0.3f);
+                    await UniTask.WaitUntil(()=> AreColumnsReady);
                     await RefillColumns();
                     await UniTask.WaitForSeconds(0.3f);
 
@@ -149,29 +152,39 @@ namespace Game
             }
         }
 
-        void CollapseColumns()
+        async UniTask CollapseColumns()
         {
+            AreColumnsReady = false;
             Vector2Int gridSize = _gridManager.GridSize;
+            var byTargetRow = new Dictionary<int, List<(int x, int fromY)>>();
 
             for (int x = 0; x < gridSize.x; x++)
             {
                 int writeY = 0;
-
                 for (int readY = 0; readY < gridSize.y; readY++)
                 {
                     if (_playfieldItems[x, readY] == null) continue;
-
                     if (readY != writeY)
                     {
-                        Vector2Int to = new Vector2Int(x, writeY);
-                        _playfieldItems[x, writeY] = _playfieldItems[x, readY];
-                        _playfieldItems[x, readY] = null;
-                        _playfieldItems[x, writeY].OccupyCell(to, animate: true);
+                        if (!byTargetRow.ContainsKey(writeY)) byTargetRow[writeY] = new();
+                        byTargetRow[writeY].Add((x, readY));
                     }
-
                     writeY++;
                 }
             }
+
+            await UniTask.WhenAll(byTargetRow.OrderBy(k => k.Key).Select(async kvp =>
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(kvp.Key * 0.05f));
+                foreach (var (x, fromY) in kvp.Value)
+                {
+                    _playfieldItems[x, kvp.Key] = _playfieldItems[x, fromY];
+                    _playfieldItems[x, fromY] = null;
+                    _playfieldItems[x, kvp.Key].OccupyCell(new Vector2Int(x, kvp.Key), animate: true);
+                }
+            }));
+
+            AreColumnsReady = true;
         }
 
         async UniTask RefillColumns()

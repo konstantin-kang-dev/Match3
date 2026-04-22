@@ -9,6 +9,7 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
 {
     RectTransform _rectTransform;
     [SerializeField] Image _icon;
+    [SerializeField] ParticleSystem _collapseVFX;
 
     Vector2 _dragStartPos = Vector2.zero;
     bool isDragged = false;
@@ -19,7 +20,6 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
     public void Init(PlayfieldItemConfig config)
     {
         _rectTransform = GetComponent<RectTransform>();
-        _icon.sprite = config.Icon;
     }
 
     public void MoveTo(Vector2 targetPos, float time = 0.5f, bool doInstantly = false)
@@ -36,12 +36,13 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
     public void AnimateDestroy()
     {
         _rectTransform
-            .DOScale(Vector3.zero, 0.3f)
+            .DOScale(Vector3.zero, 0.2f)
             .SetEase(Ease.InBack)
             .OnComplete(() =>
             {
+                _collapseVFX.Play();
                 OnDestroyed.OnNext(true);
-                Destroy(gameObject);
+                Destroy(gameObject, 2f);
             });
     }
 
