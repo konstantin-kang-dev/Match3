@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,38 @@ namespace Utils
                 .ToList();
 
             return available[Random.Range(0, available.Count)];
+        }
+
+        public static MatchShape Classify(List<Vector2Int> cells)
+        {
+            int count = cells.Count;
+
+            int minX = cells.Min(c => c.x);
+            int maxX = cells.Max(c => c.x);
+            int minY = cells.Min(c => c.y);
+            int maxY = cells.Max(c => c.y);
+
+            int w = maxX - minX + 1;
+            int h = maxY - minY + 1;
+
+            // 1. Квадрат 2×2 — высший приоритет
+            if (count == 4 && w == 2 && h == 2)
+                return MatchShape.Match4Square;
+
+            // 2. Чистая линия — bbox толщиной 1 И все клетки bbox заполнены
+            bool isPureLine = (w == 1 || h == 1) && count == Mathf.Max(w, h);
+
+            if (isPureLine)
+            {
+                bool isHorizontal = (h == 1);
+
+                if (count == 3) return MatchShape.Match3;
+                if (count == 4) return isHorizontal ? MatchShape.Match4Horizontal : MatchShape.Match4Vertical;
+                if (count >= 5) return MatchShape.Match5Line;
+            }
+
+            // 3. Всё остальное — L/T/кластер → Bomb
+            return MatchShape.Match5LT;
         }
     }
 }
