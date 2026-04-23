@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &3500177233254564571
+--- !u!1001 &4636129538967292
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -8,9 +8,41 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 738500914691032154, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: af308584ff65572458b287a219367725, type: 3}
+    - target: {fileID: 774735724347376362, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2562336379352237832, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Name
-      value: ItemAppleView Variant
+      value: ItemYellowView
+      objectReference: {fileID: 0}
+    - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.20350403
+      objectReference: {fileID: 0}
+    - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.8353236
+      objectReference: {fileID: 0}
+    - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8147572699037632774, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8656455079482730334, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8713765872291728855, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Pivot.x
@@ -90,6 +122,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8713765872291728855, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8793658777088033312, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_SortingLayer
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

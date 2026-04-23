@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8524353531704752102
+--- !u!1001 &3500177233254564571
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -11,26 +11,30 @@ PrefabInstance:
     - target: {fileID: 738500914691032154, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 4770bd6ce7eb77144a29cbcccf9b3cf8, type: 3}
+      objectReference: {fileID: 21300000, guid: 5ff652ad54c80494fa3de15daea78832, type: 3}
     - target: {fileID: 774735724347376362, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_SortingLayer
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2562336379352237832, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Name
-      value: ItemCoconutView
+      value: ItemGreenView
       objectReference: {fileID: 0}
     - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: InitialModule.startColor.maxColor.b
-      value: 0.25555965
+      value: 0.2877884
       objectReference: {fileID: 0}
     - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: InitialModule.startColor.maxColor.g
-      value: 0.25373608
+      value: 0.94070077
       objectReference: {fileID: 0}
     - target: {fileID: 3232531943457280737, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: InitialModule.startColor.maxColor.r
-      value: 0.53638804
+      value: 0.43725026
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -14
       objectReference: {fileID: 0}
     - target: {fileID: 8147572699037632774, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_SortingLayer

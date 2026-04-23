@@ -11,9 +11,10 @@ public class GridManager : MonoBehaviour
     [Header("Grid cells")]
     [SerializeField] Transform _gridCellsContainer;
     [SerializeField] GridCell _cellPrefab;
-    [SerializeField] Color _cellOddColor;
-    [SerializeField] Color _cellEvenColor;
     List<GridCell> _gridCells = new List<GridCell>();
+
+    [Header("Other")]
+    [field: SerializeField] public Transform PlayfieldItemsContainer {  get; private set; }
 
     HashSet<Vector2Int> _validCells = new HashSet<Vector2Int>();
 
@@ -41,13 +42,12 @@ public class GridManager : MonoBehaviour
         List<Vector2Int> cells = _validCells.ToList();
         for (int i = 0; i < cells.Count; i++)
         {
-            bool isEven = i % 2 == 0;
             Vector2Int cell = cells[i];
             Vector2 pos = GetPositionForCell(cell);
 
             GridCell gridCell = Instantiate(_cellPrefab, _gridCellsContainer);
-            gridCell.SetColor(isEven ? _cellEvenColor : _cellOddColor);
             gridCell.transform.localPosition = pos;
+            gridCell.SetSize(CellSize);
             _gridCells.Add(gridCell);
         }
     }

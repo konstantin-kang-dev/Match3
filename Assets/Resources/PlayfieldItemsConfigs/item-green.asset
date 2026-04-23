@@ -10,9 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 736ec1bebd63cf74c8f7b59c964a0fe8, type: 3}
-  m_Name: item-apple
+  m_Name: item-green
   m_EditorClassIdentifier: Assembly-CSharp::PlayfieldItemConfig
   ItemType: 2
-  ScoreWeight: 1
-  Icon: {fileID: 21300000, guid: 7b7f0477e0764034890961cecad7b2b7, type: 3}
+  Icon: {fileID: 21300000, guid: 5ff652ad54c80494fa3de15daea78832, type: 3}
   Prefab: {fileID: 1377010746438026707, guid: 55ef931c8cbe0dc4b919d8b74b9aa0e0, type: 3}

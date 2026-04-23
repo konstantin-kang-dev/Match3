@@ -10,9 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 736ec1bebd63cf74c8f7b59c964a0fe8, type: 3}
-  m_Name: item-milk
+  m_Name: item-pink
   m_EditorClassIdentifier: Assembly-CSharp::PlayfieldItemConfig
-  ItemType: 1
-  ScoreWeight: 1
-  Icon: {fileID: 21300000, guid: fdf47355a197d244c84ff0de20e5ee50, type: 3}
-  Prefab: {fileID: 604781167079054190, guid: dcd01f4547864fe4cb0a8a0d23b90468, type: 3}
+  ItemType: 4
+  Icon: {fileID: 21300000, guid: 43973b019e11ecd4081c619b65b9b0d7, type: 3}
+  Prefab: {fileID: 6179968948113666286, guid: 93f413b7c37270e47843b32bb79a1214, type: 3}

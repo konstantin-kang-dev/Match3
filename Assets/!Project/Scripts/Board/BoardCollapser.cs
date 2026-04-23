@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using static UnityEditor.Progress;
 
 namespace Game
 {
@@ -30,14 +32,15 @@ namespace Game
                     {
                         if (!byTargetRow.ContainsKey(writeY)) byTargetRow[writeY] = new();
                         byTargetRow[writeY].Add((x, readY));
+
+
                     }
                     writeY++;
                 }
             }
 
-            await UniTask.WhenAll(byTargetRow.OrderBy(k => k.Key).Select(async kvp =>
+            foreach (var kvp in byTargetRow.OrderBy(k => k.Key))
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(kvp.Key * 0.05f));
                 foreach (var (x, fromY) in kvp.Value)
                 {
                     var from = new Vector2Int(x, fromY);
@@ -45,9 +48,11 @@ namespace Game
                     var item = _board.Get(from);
                     _board.Set(to, item);
                     _board.Clear(from);
-                    item.OccupyCell(to, animate: true);
+                    item.OccupyCell(to, MoveAnimationType.Bounce);
                 }
-            }));
+
+                await UniTask.Delay(TimeSpan.FromSeconds(0.075f));
+            }
         }
     }
 }

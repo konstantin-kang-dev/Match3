@@ -64,8 +64,8 @@ namespace Game
             var itemA = _board.Get(from);
             var itemB = _board.Get(to);
 
-            itemA.OccupyCell(to, true);
-            itemB.OccupyCell(from, true);
+            itemA.OccupyCell(to, MoveAnimationType.Move);
+            itemB.OccupyCell(from, MoveAnimationType.Move);
 
             _board.Swap(from, to);
         }
@@ -75,6 +75,8 @@ namespace Game
         async UniTask HandleSwapProcessed(Vector2Int from, Vector2Int to)
         {
             IsMatching = true;
+
+            await UniTask.WaitForSeconds(0.15f);
             try
             {
                 IEnumerable<Vector2Int> cellsToCheck = new[] { from, to };
@@ -91,15 +93,18 @@ namespace Game
                 int cascade = 0;
                 while (groups.Count > 0)
                 {
-                    EmitMatchEvents(groups, cascade);
 
-                    await UniTask.WaitForSeconds(0.3f);
-                    DestroyMatches(groups);
-                    await UniTask.WaitForSeconds(0.3f);
+                    EmitMatchEvents(groups, cascade);
+                    //Debug.Log($"[PlayfieldManager] Emited match events (1/4)");
+
+                    await DestroyMatches(groups);
+                    //Debug.Log($"[PlayfieldManager] Destroyed matches (2/4)");
 
                     await _collapser.Collapse();
+                    //Debug.Log($"[PlayfieldManager] Collapsed board (3/4)");
+
                     await _filler.Refill();
-                    await UniTask.WaitForSeconds(0.3f);
+                    //Debug.Log($"[PlayfieldManager] Refilled board (4/4)");
 
                     groups = _matchDetector.FindMatches(null);
                     cascade++;
@@ -125,7 +130,7 @@ namespace Game
             }
         }
 
-        void DestroyMatches(List<MatchGroup> groups)
+        async UniTask DestroyMatches(List<MatchGroup> groups)
         {
             foreach (var group in groups)
                 foreach (var cell in group.Cells)
@@ -135,6 +140,8 @@ namespace Game
                     _board.Clear(cell);
                     item.DestroyItem();
                 }
+
+            await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
         }
 
         Vector2 ComputeCenter(IReadOnlyList<Vector2Int> cells)

@@ -24,6 +24,7 @@ namespace Game
 
             Model.Init(config);
             View.Init(config);
+            View.SetSize(_gridManager.CellSize);
 
             View.OnSwapRequest.Subscribe((Vector2Int direction) =>
             {
@@ -42,15 +43,13 @@ namespace Game
             _playfieldManager.TrySwap(Model.OccupiedCell, direction);
         }
 
-        public void OccupyCell(Vector2Int nextCell, bool animate = false)
+        public void OccupyCell(Vector2Int nextCell, MoveAnimationType moveAnimationType = MoveAnimationType.Move)
         {
             Model.OccupyCell(nextCell);
+            if (moveAnimationType == MoveAnimationType.None) return;
 
-            if(animate)
-            {
-                Vector2 targetPos = _gridManager.GetPositionForCell(nextCell);
-                View.MoveTo(targetPos, 0.25f);
-            }
+            Vector2 targetPos = _gridManager.GetPositionForCell(nextCell);
+            View.MoveTo(targetPos, moveAnimationType);
 
         }
 

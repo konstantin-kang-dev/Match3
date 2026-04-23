@@ -3,10 +3,10 @@ using UnityEngine.UI;
 
 public class GridCell : MonoBehaviour
 {
-    [SerializeField] Image _icon;
-
-    public void SetColor(Color color)
+    RectTransform _rectTransform;
+    public void SetSize(Vector2 size)
     {
-        _icon.color = color;
+        _rectTransform = GetComponent<RectTransform>();
+        _rectTransform.sizeDelta = size;
     }
 }
