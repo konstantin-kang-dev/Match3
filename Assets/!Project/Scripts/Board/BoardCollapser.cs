@@ -1,10 +1,6 @@
-using Cysharp.Threading.Tasks;
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-using static UnityEditor.Progress;
 
 namespace Game
 {
@@ -17,10 +13,10 @@ namespace Game
             _board = board;
         }
 
-        public async UniTask Collapse()
+        public List<CellMovement> Collapse()
         {
             var size = _board.Size;
-            var byTargetRow = new Dictionary<int, List<(int x, int fromY)>>();
+            var collapsedCells = new List<CellMovement>();
 
             for (int x = 0; x < size.x; x++)
             {
@@ -30,29 +26,22 @@ namespace Game
                     if (_board.Get(new Vector2Int(x, readY)) == null) continue;
                     if (readY != writeY)
                     {
-                        if (!byTargetRow.ContainsKey(writeY)) byTargetRow[writeY] = new();
-                        byTargetRow[writeY].Add((x, readY));
+                        Vector2Int initialCell = new Vector2Int(x, readY);
+                        Vector2Int targetCell = new Vector2Int(x, writeY);
+                        var item = _board.Get(initialCell);
+                        item.OccupyCell(targetCell);
+                        _board.Clear(initialCell);
+                        _board.Set(targetCell, item);
 
-
+                        CellMovement cellMovement = new CellMovement(item, initialCell, targetCell, false);
+                        collapsedCells.Add(cellMovement);
                     }
                     writeY++;
                 }
             }
+            
+            return collapsedCells;
 
-            foreach (var kvp in byTargetRow.OrderBy(k => k.Key))
-            {
-                foreach (var (x, fromY) in kvp.Value)
-                {
-                    var from = new Vector2Int(x, fromY);
-                    var to = new Vector2Int(x, kvp.Key);
-                    var item = _board.Get(from);
-                    _board.Set(to, item);
-                    _board.Clear(from);
-                    item.OccupyCell(to, MoveAnimationType.Bounce);
-                }
-
-                await UniTask.Delay(TimeSpan.FromSeconds(0.075f));
-            }
         }
     }
 }

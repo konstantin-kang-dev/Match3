@@ -17,12 +17,12 @@ namespace Game
             _playfieldItemsDB = itemsDB;
         }
 
-        public PlayfieldItemPresenter SpawnItem(PlayfieldItemType itemType, Transform parent)
+        public PlayfieldItem SpawnItem(PlayfieldItemType itemType, Transform parent)
         {
             PlayfieldItemConfig config = _playfieldItemsDB.GetConfigByType(itemType);
             PlayfieldItemView view = GameObject.Instantiate(config.Prefab, parent).GetComponent<PlayfieldItemView>();
 
-            var presenter = _resolver.Resolve<PlayfieldItemPresenter>();
+            var presenter = _resolver.Resolve<PlayfieldItem>();
             presenter.Init(config, view);
             return presenter;
         }

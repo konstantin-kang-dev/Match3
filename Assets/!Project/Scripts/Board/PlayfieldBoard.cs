@@ -4,33 +4,33 @@ namespace Game
 {
     public class PlayfieldBoard : IBoard
     {
-        readonly PlayfieldItemPresenter[,] _items;
+        readonly PlayfieldItem[,] _items;
         public Vector2Int Size { get; }
 
         public PlayfieldBoard(Vector2Int size)
         {
             Size = size;
-            _items = new PlayfieldItemPresenter[size.x, size.y];
+            _items = new PlayfieldItem[size.x, size.y];
         }
 
-        public PlayfieldItemPresenter Get(Vector2Int pos) => _items[pos.x, pos.y];
+        public PlayfieldItem Get(Vector2Int cell) => _items[cell.x, cell.y];
 
-        public PlayfieldItemType? GetType(Vector2Int pos)
+        public PlayfieldItemType? GetType(Vector2Int cell)
         {
-            var item = _items[pos.x, pos.y];
-            return item?.Model.Type;
+            var item = _items[cell.x, cell.y];
+            return item?.Type;
         }
 
-        public void Set(Vector2Int pos, PlayfieldItemPresenter item) => _items[pos.x, pos.y] = item;
+        public void Set(Vector2Int cell, PlayfieldItem item) => _items[cell.x, cell.y] = item;
 
-        public void Clear(Vector2Int pos) => _items[pos.x, pos.y] = null;
+        public void Clear(Vector2Int cell) => _items[cell.x, cell.y] = null;
 
-        public bool IsInBounds(Vector2Int pos) =>
-            pos.x >= 0 && pos.x < Size.x && pos.y >= 0 && pos.y < Size.y;
+        public bool IsInBounds(Vector2Int cell) =>
+            cell.x >= 0 && cell.x < Size.x && cell.y >= 0 && cell.y < Size.y;
 
-        public void Swap(Vector2Int a, Vector2Int b)
+        public void Swap(Vector2Int cellA, Vector2Int cellB)
         {
-            (_items[a.x, a.y], _items[b.x, b.y]) = (_items[b.x, b.y], _items[a.x, a.y]);
+            (_items[cellA.x, cellA.y], _items[cellB.x, cellB.y]) = (_items[cellB.x, cellB.y], _items[cellA.x, cellA.y]);
         }
     }
 }

@@ -4909,6 +4909,7 @@ GameObject:
   - component: {fileID: 8713765872291728855}
   - component: {fileID: 5174303627283078375}
   - component: {fileID: 5613670052034881416}
+  - component: {fileID: 4834496291634997032}
   m_Layer: 5
   m_Name: PlayfieldItemView
   m_TagString: Untagged
@@ -4958,9 +4959,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b0282a6aad2efd47b3ae9947a06f8b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayfieldItemVisuals
+  _canvasGroup: {fileID: 4834496291634997032}
   _icon: {fileID: 738500914691032154}
-  _shadow: {fileID: 7418657822113274882}
   _collapseVFX: {fileID: 2316747203228992545}
+--- !u!225 &4834496291634997032
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2562336379352237832}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2852196232813860692
 GameObject:
   m_ObjectHideFlags: 0

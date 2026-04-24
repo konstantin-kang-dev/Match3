@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Game
@@ -18,8 +19,13 @@ namespace Game
         {
             _playfieldItemsDB.Init();
             _gridManager.Init();
-            _playfieldManager.Init();
+            _playfieldManager.Init().Forget();
             Debug.Log($"[GameManager] Initialized.");
+        }
+
+        public void SetSpeed(float speed)
+        {
+            Time.timeScale = speed;
         }
     }
 }

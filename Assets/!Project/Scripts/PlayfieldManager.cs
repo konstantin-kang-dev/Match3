@@ -19,6 +19,7 @@ namespace Game
         MatchDetector _matchDetector;
         BoardCollapser _collapser;
         BoardFiller _filler;
+        PlayfieldAnimator _playfieldAnimator;
 
         readonly Subject<MatchResolvedEvent> _onMatchResolved = new();
         public Observable<MatchResolvedEvent> OnMatchResolved => _onMatchResolved.AsObservable();
@@ -34,14 +35,18 @@ namespace Game
             _factory = factory;
         }
 
-        public void Init()
+        public async UniTask Init()
         {
+            IsMatching = true;
             _board = new PlayfieldBoard(_gridManager.GridSize);
             _matchDetector = new MatchDetector(_board);
             _collapser = new BoardCollapser(_board);
             _filler = new BoardFiller(_board, _gridManager, _factory);
+            _playfieldAnimator = new PlayfieldAnimator(_gridManager);
 
-            _filler.SpawnInitial().Forget();
+            var refillMovements = _filler.Refill();
+            await _playfieldAnimator.AnimateFall(refillMovements);
+            IsMatching = false;
             Debug.Log("[PlayfieldManager] Initialized.");
         }
 
@@ -63,9 +68,13 @@ namespace Game
 
             var itemA = _board.Get(from);
             var itemB = _board.Get(to);
+            CellMovement movementDataA = new CellMovement(itemA, from, to, false);
+            CellMovement movementDataB = new CellMovement(itemB, to, from, false);
 
-            itemA.OccupyCell(to, MoveAnimationType.Move);
-            itemB.OccupyCell(from, MoveAnimationType.Move);
+            itemA.OccupyCell(to);
+            itemB.OccupyCell(from);
+
+            _playfieldAnimator.MoveItems(new List<CellMovement>() { movementDataA, movementDataB});
 
             _board.Swap(from, to);
         }
@@ -84,9 +93,8 @@ namespace Game
 
                 if (groups.Count == 0)
                 {
-                    await UniTask.WaitForSeconds(0.3f);
                     RevertSwap();
-                    await UniTask.WaitForSeconds(0.3f);
+                    await UniTask.WaitForSeconds(0.15f);
                     return;
                 }
 
@@ -95,17 +103,19 @@ namespace Game
                 {
 
                     EmitMatchEvents(groups, cascade);
-                    //Debug.Log($"[PlayfieldManager] Emited match events (1/4)");
 
                     await DestroyMatches(groups);
-                    //Debug.Log($"[PlayfieldManager] Destroyed matches (2/4)");
 
-                    await _collapser.Collapse();
-                    //Debug.Log($"[PlayfieldManager] Collapsed board (3/4)");
+                    var collapseMovements = _collapser.Collapse();
+                    var refillMovements = _filler.Refill();
 
-                    await _filler.Refill();
-                    //Debug.Log($"[PlayfieldManager] Refilled board (4/4)");
+                    var allMovements = new List<CellMovement>(collapseMovements.Count + refillMovements.Count);
+                    allMovements.AddRange(collapseMovements);
+                    allMovements.AddRange(refillMovements);
 
+                    await _playfieldAnimator.AnimateFall(allMovements);
+
+                    await UniTask.WaitForSeconds(0.15f);
                     groups = _matchDetector.FindMatches(null);
                     cascade++;
                 }
