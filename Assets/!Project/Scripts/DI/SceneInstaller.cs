@@ -15,6 +15,7 @@ public class SceneInstaller: LifetimeScope
         builder.Register<GameManager>(Lifetime.Singleton);
         builder.Register<PlayfieldManager>(Lifetime.Singleton);
         builder.Register<PlayfieldItemsFactory>(Lifetime.Singleton);
+        builder.Register<PlayerProgressionManager>(Lifetime.Singleton);
         builder.Register<PlayfieldItem>(Lifetime.Transient);
     }
 }

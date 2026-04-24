@@ -12,7 +12,7 @@ public enum PlayfieldItemType
     ItemPink = 4,
 }
 
-[Serializable, CreateAssetMenu(fileName = "PlayfieldItemConfig", menuName = "GameContent/PlayfieldItemConfig")]
+[Serializable, CreateAssetMenu(fileName = "PlayfieldItemConfig", menuName = "GameData/PlayfieldItemConfig")]
 public class PlayfieldItemConfig: ScriptableObject
 {
     public PlayfieldItemType ItemType;

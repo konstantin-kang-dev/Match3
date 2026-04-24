@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.7456898, g: 0.8362378, b: 0.9299191, a: 1}
+  m_Color: {r: 0.6392157, g: 0.85882354, b: 1, a: 0.5568628}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -133,4 +133,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf0c008a5188f24478b9d475b97ee283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridCell
-  _icon: {fileID: 6036046916928070823}
