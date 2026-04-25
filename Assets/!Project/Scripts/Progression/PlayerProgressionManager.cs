@@ -10,16 +10,8 @@ namespace Game
 
         PlayerProgressionConfig _progressionConfig;
         MatchShapesConfig _matchShapesConfig;
-        public int PlayerLevel { get; private set; } = 1;
-        public float PlayerExp { get; private set; } = 0f;
-        public float RequiredExpToLvlUp { get; private set; } = 0f;
-
-        readonly Subject<int> _onLevelUp = new();
-        public Observable<int> OnLevelUp => _onLevelUp.AsObservable();
-
-        readonly Subject<(float current, float required)> _onExpChanged = new();
-        public Observable<(float current, float required)> OnExpChanged => _onExpChanged.AsObservable();
-
+        public ReactiveProperty<int> PlayerLevel { get; private set; } = new(1);
+        public ReactiveProperty<(float current, float required)> PlayerExp { get; private set; } = new((0f, 0f));
         public PlayerProgressionManager(PlayfieldManager playfieldManager)
         {
             _playfieldManager = playfieldManager;
@@ -34,7 +26,7 @@ namespace Game
             _playfieldManager.OnMatchResolved.Subscribe(HandleMatchResolved);
 
             SetLevel(1);
-            SetExp(0);
+            SetCurrentExp(0);
         }
 
         void HandleMatchResolved(MatchResolvedEvent matchEvent)
@@ -51,33 +43,31 @@ namespace Game
             }
             else
             {
-                SetExp(PlayerExp + exp);
+                SetCurrentExp(PlayerExp.Value.current + exp);
             }
         }
 
-        void SetExp(float exp)
+        void SetCurrentExp(float exp)
         {
-            PlayerExp = exp;
-
-            _onExpChanged.OnNext((PlayerExp, RequiredExpToLvlUp));
+            PlayerExp.Value = (exp, PlayerExp.Value.required);
         }
 
         bool IsLevelUpAvailable()
         {
-            return PlayerExp >= RequiredExpToLvlUp;
+            return PlayerExp.Value.current >= PlayerExp.Value.required;
         }
 
         void LevelUp()
         {
-            SetExp(PlayerExp - RequiredExpToLvlUp);
-            SetLevel(PlayerLevel + 1);
+            SetCurrentExp(PlayerExp.Value.current - PlayerExp.Value.required);
+            SetLevel(PlayerLevel.Value + 1);
         }
 
         void SetLevel(int level)
         {
-            PlayerLevel = level;
-            RequiredExpToLvlUp = _progressionConfig.GetRequiredExp(PlayerLevel + 1);
-            _onLevelUp.OnNext(PlayerLevel);
+            PlayerLevel.Value = level;
+
+            PlayerExp.Value = (PlayerExp.Value.current, _progressionConfig.GetRequiredExp(PlayerLevel.Value + 1));
         }
     }
 }

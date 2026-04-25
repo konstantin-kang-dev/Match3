@@ -1,6 +1,7 @@
 ﻿using Game;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using UnityEditor;
@@ -65,6 +66,25 @@ namespace Utils
 
             // 3. Всё остальное — L/T/кластер → Bomb
             return MatchShape.Match5LT;
+        }
+
+        private static readonly string[] Suffixes = { "", "K", "M", "B", "T", "Qa", "Qi" };
+
+        public static string FormatNumber(float value)
+        {
+            if (value < 1000) return value.ToString();
+
+            int suffixIndex = 0;
+            double shortValue = value;
+
+            while (shortValue >= 1000 && suffixIndex < Suffixes.Length - 1)
+            {
+                shortValue /= 1000;
+                suffixIndex++;
+            }
+
+            shortValue = Math.Floor(shortValue * 10) / 10;
+            return shortValue.ToString("0.#", CultureInfo.InvariantCulture) + Suffixes[suffixIndex];
         }
     }
 }

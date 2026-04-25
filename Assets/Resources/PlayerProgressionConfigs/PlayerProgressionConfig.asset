@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54c9efe3dba1e2d469473fdc7ee54ba5, type: 3}
   m_Name: PlayerProgressionConfig
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProgressionConfig
-  StartRequiredExp: 100
+  StartRequiredExp: 50
   RequiredExpMultiplierPerLevel: 1.1

@@ -17,5 +17,10 @@ public class SceneInstaller: LifetimeScope
         builder.Register<PlayfieldItemsFactory>(Lifetime.Singleton);
         builder.Register<PlayerProgressionManager>(Lifetime.Singleton);
         builder.Register<PlayfieldItem>(Lifetime.Transient);
+
+
+        builder.RegisterComponentInHierarchy<HUDRoot>();
+        builder.Register(resolver => resolver.Resolve<HUDRoot>().PlayerLevelUIView, Lifetime.Singleton);
+        builder.RegisterEntryPoint<PlayerLevelUIPresenter>();
     }
 }
