@@ -17,13 +17,13 @@ namespace Game
     public readonly struct MatchGroup
     {
         public readonly IReadOnlyList<Vector2Int> Cells;
-        public readonly PlayfieldItemType Type;
+        public readonly PlayfieldItemColorType Color;
         public readonly MatchShape Shape;
 
-        public MatchGroup(List<Vector2Int> cells, PlayfieldItemType type)
+        public MatchGroup(List<Vector2Int> cells, PlayfieldItemColorType type)
         {
             Cells = cells;
-            Type = type;
+            Color = type;
             Shape = ProjectUtils.Classify(cells);
         }
     }
@@ -31,20 +31,20 @@ namespace Game
     public readonly struct MatchResolvedEvent
     {
         public readonly IReadOnlyList<Vector2Int> Cells;
-        public readonly PlayfieldItemType Type;
+        public readonly PlayfieldItemColorType Color;
         public readonly MatchShape Shape;
         public readonly int CascadeLevel;
         public readonly Vector2 WorldCenter;
 
         public MatchResolvedEvent(
             IReadOnlyList<Vector2Int> cells,
-            PlayfieldItemType type,
+            PlayfieldItemColorType type,
             MatchShape shape,
             int cascadeLevel,
             Vector2 worldCenter)
         {
             Cells = cells;
-            Type = type;
+            Color = type;
             Shape = shape;
             CascadeLevel = cascadeLevel;
             WorldCenter = worldCenter;

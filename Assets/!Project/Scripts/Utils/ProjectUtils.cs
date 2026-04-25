@@ -12,6 +12,11 @@ namespace Utils
 {
     public static class ProjectUtils
     {
+        public static bool RollChance(float chance)
+        {
+            return Random.Range(0, 100f) <= chance;
+        }
+
         public static Vector2Int GetSwipeDirection(Vector2 delta)
         {
             if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
@@ -20,16 +25,25 @@ namespace Utils
                 return delta.y > 0 ? Vector2Int.up : Vector2Int.down;
         }
 
-        public static PlayfieldItemType GetRandomPlayfieldItemType()
+        public static PlayfieldItemColorType GetRandomPlayfieldItemColorType()
         {
-            var values = Enum.GetValues(typeof(PlayfieldItemType));
-            var random = (PlayfieldItemType)values.GetValue(Random.Range(0, values.Length));
+            var values = Enum.GetValues(typeof(PlayfieldItemColorType));
+            var random = (PlayfieldItemColorType)values.GetValue(Random.Range(0, values.Length));
             return random;
         }
-        public static PlayfieldItemType GetRandomPlayfieldItemTypeExcluding(HashSet<PlayfieldItemType> forbidden)
+        public static PlayfieldItemColorType GetRandomPlayfieldItemColorTypeExcluding(HashSet<PlayfieldItemColorType> forbidden)
         {
-            var available = System.Enum.GetValues(typeof(PlayfieldItemType))
-                .Cast<PlayfieldItemType>()
+            var available = System.Enum.GetValues(typeof(PlayfieldItemColorType))
+                .Cast<PlayfieldItemColorType>()
+                .Where(t => !forbidden.Contains(t))
+                .ToList();
+
+            return available[Random.Range(0, available.Count)];
+        }
+        public static PlayfieldItemKind GetRandomPlayfieldItemKindExcluding(HashSet<PlayfieldItemKind> forbidden)
+        {
+            var available = System.Enum.GetValues(typeof(PlayfieldItemKind))
+                .Cast<PlayfieldItemKind>()
                 .Where(t => !forbidden.Contains(t))
                 .ToList();
 

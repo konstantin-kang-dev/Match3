@@ -15,10 +15,10 @@ namespace Game
 
         public PlayfieldItem Get(Vector2Int cell) => _items[cell.x, cell.y];
 
-        public PlayfieldItemType? GetType(Vector2Int cell)
+        public PlayfieldItemColorType? GetType(Vector2Int cell)
         {
             var item = _items[cell.x, cell.y];
-            return item?.Type;
+            return item?.Color;
         }
 
         public void Set(Vector2Int cell, PlayfieldItem item) => _items[cell.x, cell.y] = item;

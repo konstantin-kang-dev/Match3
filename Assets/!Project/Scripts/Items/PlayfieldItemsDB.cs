@@ -1,34 +1,51 @@
-﻿using System;
+﻿using Game.Configs;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
-
-public class PlayfieldItemsDB: MonoBehaviour
+public class PlayfieldItemsDB : MonoBehaviour
 {
     [SerializeField] string _configsPath = "PlayfieldItemsConfigs/";
-    Dictionary<PlayfieldItemType, PlayfieldItemConfig> _configs = new Dictionary<PlayfieldItemType, PlayfieldItemConfig>();
+
+    Dictionary<PlayfieldItemKind, PlayfieldItemConfig> _byKind = new();
+    Dictionary<PlayfieldItemColorType, ColoredItemConfig> _byColor = new();
 
     public void Init()
     {
-        LoadConfigs();
-    }
+        _byKind.Clear();
+        _byColor.Clear();
 
-    void LoadConfigs()
-    {
-        _configs.Clear();
-        PlayfieldItemConfig[] configs = Resources.LoadAll<PlayfieldItemConfig>(_configsPath);
-
+        var configs = Resources.LoadAll<PlayfieldItemConfig>(_configsPath);
         foreach (var config in configs)
         {
-            _configs.Add(config.ItemType, config);
+            if (config is ColoredItemConfig colored)
+            {
+                _byColor[colored.Color] = colored;
+            }
+            else
+            {
+                if (_byKind.ContainsKey(config.Kind))
+                    Debug.LogError($"[PlayfieldItemsDB] Duplicate config for kind {config.Kind}");
+                _byKind[config.Kind] = config;
+            }
         }
     }
 
-    public PlayfieldItemConfig GetConfigByType(PlayfieldItemType type)
+    public T Get<T>(PlayfieldItemKind kind) where T : PlayfieldItemConfig
     {
-        if (!_configs.ContainsKey(type)) throw new Exception($"[PlayfieldItemsDB] Item with type {type} does not exist in configs list.");
+        if (!_byKind.TryGetValue(kind, out var config))
+            throw new Exception($"[PlayfieldItemsDB] No config for kind {kind}");
 
-        return _configs[type];
+        if (config is not T typed)
+            throw new Exception($"[PlayfieldItemsDB] Config for {kind} is not {typeof(T).Name}");
+
+        return typed;
+    }
+
+    public ColoredItemConfig GetColored(PlayfieldItemColorType color)
+    {
+        if (!_byColor.TryGetValue(color, out var config))
+            throw new Exception($"[PlayfieldItemsDB] No colored config for {color}");
+        return config;
     }
 }

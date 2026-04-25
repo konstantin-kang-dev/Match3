@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using Game.Configs;
 using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -32,11 +33,12 @@ public class PlayfieldItemView: MonoBehaviour, IBeginDragHandler, IDragHandler, 
     public void Init(PlayfieldItemConfig config)
     {
         _rectTransform = GetComponent<RectTransform>();
+        SetVisibility(false, true);
     }
 
-    public void SetVisibility(bool visible)
+    public void SetVisibility(bool visible, bool force = false)
     {
-        if (_isVisible == visible) return;
+        if (_isVisible == visible && !force) return;
 
         if (visible)
         {

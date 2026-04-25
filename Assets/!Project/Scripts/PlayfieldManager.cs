@@ -132,7 +132,7 @@ namespace Game
             {
                 _onMatchResolved.OnNext(new MatchResolvedEvent(
                     cells: group.Cells,
-                    type: group.Type,
+                    type: group.Color,
                     shape: group.Shape,
                     cascadeLevel: cascade,
                     worldCenter: ComputeCenter(group.Cells)
