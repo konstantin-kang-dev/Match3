@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerProgressionConfig", menuName = "GameData/PlayerProgressionConfig")]
-public class PlayerProgressionConfig: ScriptableObject
+public class PlayerProgressionConfig : ScriptableObject
 {
     public float StartRequiredExp = 100f;
     public float RequiredExpMultiplierPerLevel = 1.1f;

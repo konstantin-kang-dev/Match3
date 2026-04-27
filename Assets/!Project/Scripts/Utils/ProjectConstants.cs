@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Utils
+﻿namespace Game.Utils
 {
     public static class ProjectConstants
     {

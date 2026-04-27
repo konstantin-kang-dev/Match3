@@ -1,14 +1,14 @@
-﻿using Game.Configs;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Game.Configs;
 using UnityEngine;
 
 public class PlayfieldItemsDB : MonoBehaviour
 {
-    [SerializeField] string _configsPath = "PlayfieldItemsConfigs/";
+    [SerializeField] private string _configsPath = "PlayfieldItemsConfigs/";
+    private readonly Dictionary<PlayfieldItemColorType, ColoredItemConfig> _byColor = new();
 
-    Dictionary<PlayfieldItemKind, PlayfieldItemConfig> _byKind = new();
-    Dictionary<PlayfieldItemColorType, ColoredItemConfig> _byColor = new();
+    private readonly Dictionary<PlayfieldItemKind, PlayfieldItemConfig> _byKind = new();
 
     public void Init()
     {
@@ -17,7 +17,6 @@ public class PlayfieldItemsDB : MonoBehaviour
 
         var configs = Resources.LoadAll<PlayfieldItemConfig>(_configsPath);
         foreach (var config in configs)
-        {
             if (config is ColoredItemConfig colored)
             {
                 _byColor[colored.Color] = colored;
@@ -28,7 +27,6 @@ public class PlayfieldItemsDB : MonoBehaviour
                     Debug.LogError($"[PlayfieldItemsDB] Duplicate config for kind {config.Kind}");
                 _byKind[config.Kind] = config;
             }
-        }
     }
 
     public T Get<T>(PlayfieldItemKind kind) where T : PlayfieldItemConfig

@@ -4,9 +4,8 @@ using VContainer;
 
 public class DebugTools : MonoBehaviour
 {
-    GameManager _gameManager;
-
-    [SerializeField] float _initialGameSpeed = 1f;
+    [SerializeField] private float _initialGameSpeed = 1f;
+    private GameManager _gameManager;
 
     [Inject]
     public void Construct(GameManager gameManager)

@@ -1,16 +1,14 @@
-﻿using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace Game
 {
     public class PlayfieldAnimator
     {
-        const float FallInterval = 0.1f;
-        readonly GridManager _gridManager;
+        private const float FallInterval = 0.1f;
+        private readonly GridManager _gridManager;
 
         public PlayfieldAnimator(GridManager gridManager)
         {
@@ -27,9 +25,9 @@ namespace Game
             {
                 if (movementData.IsNew)
                 {
-
                 }
-                Vector2 startPos = _gridManager.GetPositionForCell(movementData.FromCell);
+
+                var startPos = _gridManager.GetPositionForCell(movementData.FromCell);
                 movementData.Item.MoveTo(startPos, MoveAnimationType.None);
             }
 
@@ -37,16 +35,15 @@ namespace Game
             await UniTask.WhenAll(tasks);
         }
 
-        async UniTask AnimateColumn(List<CellMovement> columnMoves)
+        private async UniTask AnimateColumn(List<CellMovement> columnMoves)
         {
             foreach (var movementData in columnMoves)
             {
-                Vector2 targetPos = _gridManager.GetPositionForCell(movementData.ToCell);
+                var targetPos = _gridManager.GetPositionForCell(movementData.ToCell);
                 movementData.Item.MoveTo(targetPos, MoveAnimationType.Bounce);
-                movementData.Item.SetVisibility(true);
+                if(movementData.IsNew) movementData.Item.SetVisibility(true);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(FallInterval));
-
             }
         }
 
@@ -54,8 +51,8 @@ namespace Game
         {
             foreach (var movementData in movements)
             {
-                Vector2 targetPos = _gridManager.GetPositionForCell(movementData.ToCell);
-                movementData.Item.MoveTo(targetPos, MoveAnimationType.Move);
+                var targetPos = _gridManager.GetPositionForCell(movementData.ToCell);
+                movementData.Item.MoveTo(targetPos);
             }
         }
     }

@@ -1,12 +1,24 @@
+using System;
 using Game.Configs;
 using R3;
-using System;
 using UnityEngine;
 
 namespace Game
 {
     public class PlayfieldItem : IDisposable
     {
+        private readonly GridManager _gridManager;
+
+        private readonly ISwapRequester _swapRequester;
+
+        private PlayfieldItemView _view;
+
+        public PlayfieldItem(ISwapRequester swapRequester, GridManager gridManager)
+        {
+            _swapRequester = swapRequester;
+            _gridManager = gridManager;
+        }
+
         public PlayfieldItemKind Kind { get; private set; }
         public PlayfieldItemColorType? Color { get; private set; }
         public IPowerUpBehaviour PowerUp { get; private set; }
@@ -14,15 +26,8 @@ namespace Game
 
         public bool IsPowerUp => PowerUp != null;
 
-        PlayfieldItemView _view;
-
-        readonly PlayfieldManager _playfieldManager;
-        readonly GridManager _gridManager;
-
-        public PlayfieldItem(PlayfieldManager playfieldManager, GridManager gridManager)
+        public void Dispose()
         {
-            _playfieldManager = playfieldManager;
-            _gridManager = gridManager;
         }
 
         public void Init(PlayfieldItemConfig config, PlayfieldItemView view, IPowerUpBehaviour powerUp)
@@ -35,25 +40,42 @@ namespace Game
             _view.Init(config);
             _view.SetSize(_gridManager.CellSize);
 
+            if (Kind == PlayfieldItemKind.Rocket)
+            {
+                RocketBehaviour rocketBehaviour = powerUp as RocketBehaviour;
+                if (rocketBehaviour != null && rocketBehaviour.Orientation == RocketOrientation.Vertical)
+                {
+                    _view.SetAlternativeSprite(true);
+                }
+            }
+            
             _view.OnSwapRequest.Subscribe(HandleSwapRequest);
             _view.OnDestroyed.Subscribe(_ => Dispose());
         }
 
-        void HandleSwapRequest(Vector2Int direction)
+        private void HandleSwapRequest(Vector2Int direction)
         {
-            if (_playfieldManager.IsMatching) return;
-            _playfieldManager.TrySwap(OccupiedCell, direction);
+            _swapRequester.TrySwap(OccupiedCell, direction);
         }
 
-        public void OccupyCell(Vector2Int cell) => OccupiedCell = cell;
+        public void OccupyCell(Vector2Int cell)
+        {
+            OccupiedCell = cell;
+        }
 
         public void MoveTo(Vector2 targetPos, MoveAnimationType anim = MoveAnimationType.Move)
-            => _view.MoveTo(targetPos, anim);
+        {
+            _view.MoveTo(targetPos, anim);
+        }
 
-        public void SetVisibility(bool visible) => _view.SetVisibility(visible);
+        public void SetVisibility(bool visible)
+        {
+            _view.SetVisibility(visible);
+        }
 
-        public void DestroyItem() => _view.AnimateDestroy();
-
-        public void Dispose() { }
+        public void DestroyItem()
+        {
+            _view.AnimateDestroy();
+        }
     }
 }

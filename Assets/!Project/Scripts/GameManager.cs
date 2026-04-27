@@ -5,31 +5,39 @@ namespace Game
 {
     public class GameManager
     {
-        readonly PlayfieldManager _playfieldManager;
-        readonly PlayfieldItemsDB _playfieldItemsDB;
-        readonly GridManager _gridManager;
-        readonly PlayerProgressionManager _playerProgressionManager;
+        private readonly GridManager _gridManager;
+        private readonly PlayerProgressionManager _playerProgressionManager;
+        private readonly PlayfieldItemsDB _playfieldItemsDB;
+        private readonly PlayfieldManager _playfieldManager;
+        private readonly PlayfieldVfxDB _playfieldVfxDB;
+        private readonly IVfxService _vfxService;
 
         public GameManager(
             PlayfieldManager playfieldManager,
             PlayfieldItemsDB itemsDB,
             GridManager gridManager,
-            PlayerProgressionManager playerProgressionManager
-            )
+            PlayerProgressionManager playerProgressionManager,
+            PlayfieldVfxDB playfieldVfxDB,
+            IVfxService vfxService
+        )
         {
             _playfieldManager = playfieldManager;
             _playfieldItemsDB = itemsDB;
             _gridManager = gridManager;
             _playerProgressionManager = playerProgressionManager;
+            _playfieldVfxDB =  playfieldVfxDB;
+            _vfxService = vfxService;
         }
 
         public void Init()
         {
-            _playerProgressionManager.Init();
             _playfieldItemsDB.Init();
+            _playfieldVfxDB.Init();
             _gridManager.Init();
             _playfieldManager.Init().Forget();
-            Debug.Log($"[GameManager] Initialized.");
+            _playerProgressionManager.Init();
+            _vfxService.Init(_gridManager.GridCellsContainer);
+            Debug.Log("[GameManager] Initialized.");
         }
 
         public void SetSpeed(float speed)

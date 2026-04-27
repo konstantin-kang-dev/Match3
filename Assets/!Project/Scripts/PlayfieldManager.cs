@@ -1,165 +1,172 @@
-using Cysharp.Threading.Tasks;
-using R3;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
-using Utils;
+using Game.Utils;
 
 namespace Game
 {
+    public class PlayfieldManager : ISwapRequester
+{
+    readonly GridManager _gridManager;
+    readonly PlayfieldItemsFactory _factory;
 
+    PlayfieldBoard _board;
+    MatchDetector _matchDetector;
+    MatchResolver _matchResolver;
+    BoardMutator _boardMutator;
+    BoardContext _boardContext;
+    BoardCollapser _collapser;
+    BoardFiller _filler;
+    PlayfieldAnimator _playfieldAnimator;
 
-    public class PlayfieldManager
+    public Observable<MatchResolvedEvent> OnMatchResolved => _matchResolver.OnMatchResolved;
+
+    public bool IsMatching { get; private set; }
+
+    Vector2Int _lastSwapFrom;
+    Vector2Int _lastSwapTo;
+
+    public PlayfieldManager(GridManager gridManager, PlayfieldItemsFactory factory)
     {
-        readonly GridManager _gridManager;
-        readonly PlayfieldItemsFactory _factory;
+        _gridManager = gridManager;
+        _factory = factory;
+    }
 
-        PlayfieldBoard _board;
-        MatchDetector _matchDetector;
-        BoardCollapser _collapser;
-        BoardFiller _filler;
-        PlayfieldAnimator _playfieldAnimator;
+    public async UniTask Init()
+    {
+        IsMatching = true;
+        _board = new PlayfieldBoard(_gridManager.GridSize);
+        _matchDetector = new MatchDetector(_board);
+        _boardMutator = new BoardMutator(_board, _factory, _gridManager);
+        _boardContext = new BoardContext(_board, _boardMutator, _gridManager);
+        _matchResolver = new MatchResolver(_boardMutator, _gridManager, _boardContext);
+        _collapser = new BoardCollapser(_board);
+        _filler = new BoardFiller(_board, _gridManager, _factory);
+        _playfieldAnimator = new PlayfieldAnimator(_gridManager);
 
-        readonly Subject<MatchResolvedEvent> _onMatchResolved = new();
-        public Observable<MatchResolvedEvent> OnMatchResolved => _onMatchResolved.AsObservable();
+        var refillMovements = _filler.Refill();
+        await _playfieldAnimator.AnimateFall(refillMovements);
+        IsMatching = false;
+    }
 
-        public bool IsMatching { get; private set; }
+    public void TrySwap(Vector2Int from, Vector2Int direction)
+    {
+        if (IsMatching) return;
+        Vector2Int to = from + direction;
+        if (!_gridManager.IsValidCell(to)) return;
 
-        Vector2Int _lastSwapFrom;
-        Vector2Int _lastSwapTo;
+        var itemA = _board.Get(from);
+        var itemB = _board.Get(to);
 
-        public PlayfieldManager(GridManager gridManager, PlayfieldItemsFactory factory)
+        bool aIsPowerUp = itemA != null && itemA.IsPowerUp;
+        bool bIsPowerUp = itemB != null && itemB.IsPowerUp;
+
+        if (aIsPowerUp && bIsPowerUp)
         {
-            _gridManager = gridManager;
-            _factory = factory;
+            // комбо — пока не реализовано
+            return;
         }
 
-        public async UniTask Init()
+        if (aIsPowerUp || bIsPowerUp)
         {
-            IsMatching = true;
-            _board = new PlayfieldBoard(_gridManager.GridSize);
-            _matchDetector = new MatchDetector(_board);
-            _collapser = new BoardCollapser(_board);
-            _filler = new BoardFiller(_board, _gridManager, _factory);
-            _playfieldAnimator = new PlayfieldAnimator(_gridManager);
+            HandlePowerUpSwap(from, to, aIsPowerUp ? itemA : itemB).Forget();
+            return;
+        }
 
-            var refillMovements = _filler.Refill();
-            await _playfieldAnimator.AnimateFall(refillMovements);
+        SwapItems(from, to);
+        HandleSwapProcessed(from, to).Forget();
+    }
+
+    void SwapItems(Vector2Int from, Vector2Int to)
+    {
+        _lastSwapFrom = from;
+        _lastSwapTo = to;
+        var itemA = _board.Get(from);
+        var itemB = _board.Get(to);
+        var movementA = new CellMovement(itemA, from, to, false);
+        var movementB = new CellMovement(itemB, to, from, false);
+        itemA.OccupyCell(to);
+        itemB.OccupyCell(from);
+        _playfieldAnimator.MoveItems(new List<CellMovement> { movementA, movementB });
+        _board.Swap(from, to);
+    }
+
+    void RevertSwap() => SwapItems(_lastSwapTo, _lastSwapFrom);
+
+    async UniTask HandleSwapProcessed(Vector2Int from, Vector2Int to)
+    {
+        IsMatching = true;
+        await UniTask.WaitForSeconds(0.15f);
+
+        try
+        {
+            var groups = _matchDetector.FindMatches(new[] { from, to });
+
+            if (groups.Count == 0)
+            {
+                RevertSwap();
+                await UniTask.WaitForSeconds(0.15f);
+                return;
+            }
+
+            await _matchResolver.Resolve(groups, swapCell: to, cascade: 0);
+
+            await ProcessCascadeAfterMutation();
+        }
+        finally
+        {
             IsMatching = false;
-            Debug.Log("[PlayfieldManager] Initialized.");
-        }
-
-        public void TrySwap(Vector2Int from, Vector2Int direction)
-        {
-            if (IsMatching) return;
-
-            Vector2Int to = from + direction;
-            if (!_gridManager.IsValidCell(to)) return;
-
-            SwapItems(from, to);
-            HandleSwapProcessed(from, to).Forget();
-        }
-
-        void SwapItems(Vector2Int from, Vector2Int to)
-        {
-            _lastSwapFrom = from;
-            _lastSwapTo = to;
-
-            var itemA = _board.Get(from);
-            var itemB = _board.Get(to);
-            CellMovement movementDataA = new CellMovement(itemA, from, to, false);
-            CellMovement movementDataB = new CellMovement(itemB, to, from, false);
-
-            itemA.OccupyCell(to);
-            itemB.OccupyCell(from);
-
-            _playfieldAnimator.MoveItems(new List<CellMovement>() { movementDataA, movementDataB});
-
-            _board.Swap(from, to);
-        }
-
-        void RevertSwap() => SwapItems(_lastSwapTo, _lastSwapFrom);
-
-        async UniTask HandleSwapProcessed(Vector2Int from, Vector2Int to)
-        {
-            IsMatching = true;
-
-            await UniTask.WaitForSeconds(0.15f);
-            try
-            {
-                IEnumerable<Vector2Int> cellsToCheck = new[] { from, to };
-                var groups = _matchDetector.FindMatches(cellsToCheck);
-
-                if (groups.Count == 0)
-                {
-                    RevertSwap();
-                    await UniTask.WaitForSeconds(0.15f);
-                    return;
-                }
-
-                int cascade = 0;
-                while (groups.Count > 0)
-                {
-
-                    EmitMatchEvents(groups, cascade);
-
-                    await DestroyMatches(groups);
-
-                    var collapseMovements = _collapser.Collapse();
-                    var refillMovements = _filler.Refill();
-
-                    var allMovements = new List<CellMovement>(collapseMovements.Count + refillMovements.Count);
-                    allMovements.AddRange(collapseMovements);
-                    allMovements.AddRange(refillMovements);
-
-                    await _playfieldAnimator.AnimateFall(allMovements);
-
-                    await UniTask.WaitForSeconds(0.15f);
-                    groups = _matchDetector.FindMatches(null);
-                    cascade++;
-                }
-            }
-            finally
-            {
-                IsMatching = false;
-            }
-        }
-
-        void EmitMatchEvents(List<MatchGroup> groups, int cascade)
-        {
-            foreach (var group in groups)
-            {
-                _onMatchResolved.OnNext(new MatchResolvedEvent(
-                    cells: group.Cells,
-                    type: group.Color,
-                    shape: group.Shape,
-                    cascadeLevel: cascade,
-                    worldCenter: ComputeCenter(group.Cells)
-                ));
-            }
-        }
-
-        async UniTask DestroyMatches(List<MatchGroup> groups)
-        {
-            foreach (var group in groups)
-                foreach (var cell in group.Cells)
-                {
-                    var item = _board.Get(cell);
-                    if (item == null) continue;
-                    _board.Clear(cell);
-                    item.DestroyItem();
-                }
-
-            await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
-        }
-
-        Vector2 ComputeCenter(IReadOnlyList<Vector2Int> cells)
-        {
-            Vector2 sum = Vector2.zero;
-            foreach (var c in cells)
-                sum += _gridManager.GetPositionForCell(c);
-            return sum / cells.Count;
         }
     }
+    async UniTask HandlePowerUpSwap(Vector2Int from, Vector2Int to, PlayfieldItem powerUp)
+    {
+        IsMatching = true;
+        try
+        {
+            // Определяем цвет цели до свапа
+            var targetItem = _board.Get(from) == powerUp ? _board.Get(to) : _board.Get(from);
+            var swappedColor = targetItem?.Color;
+
+            SwapItems(from, to);
+            await UniTask.WaitForSeconds(0.15f);
+
+            Vector2Int activationCell = powerUp.OccupiedCell;
+            _board.Clear(activationCell);
+
+            var activationContext = new ActivationContext(activationCell, swappedColor);
+            await powerUp.PowerUp.Activate(activationContext, _boardContext);
+
+            powerUp.DestroyItem();
+
+            await ProcessCascadeAfterMutation();
+        }
+        finally
+        {
+            IsMatching = false;
+        }
+    }
+    async UniTask ProcessCascadeAfterMutation()
+    {
+        int cascade = 0;
+        while (true)
+        {
+            var collapseMovements = _collapser.Collapse();
+            var refillMovements = _filler.Refill();
+            var allMovements = new List<CellMovement>(collapseMovements.Count + refillMovements.Count);
+            allMovements.AddRange(collapseMovements);
+            allMovements.AddRange(refillMovements);
+            await _playfieldAnimator.AnimateFall(allMovements);
+            await UniTask.WaitForSeconds(0.15f);
+
+            var groups = _matchDetector.FindMatches(null);
+            if (groups.Count == 0) break;
+
+            await _matchResolver.Resolve(groups, swapCell: null, cascade);
+            cascade++;
+        }
+    }
+    }
+
 }

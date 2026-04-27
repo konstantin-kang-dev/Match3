@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Utils;
+using Game.Utils;
 
 namespace Game
 {
@@ -38,13 +38,13 @@ namespace Game
 
         public MatchResolvedEvent(
             IReadOnlyList<Vector2Int> cells,
-            PlayfieldItemColorType type,
+            PlayfieldItemColorType color,
             MatchShape shape,
             int cascadeLevel,
             Vector2 worldCenter)
         {
             Cells = cells;
-            Color = type;
+            Color = color;
             Shape = shape;
             CascadeLevel = cascadeLevel;
             WorldCenter = worldCenter;

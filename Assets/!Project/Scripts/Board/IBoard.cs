@@ -6,7 +6,7 @@ namespace Game
     {
         Vector2Int Size { get; }
         PlayfieldItem Get(Vector2Int pos);
-        PlayfieldItemColorType? GetType(Vector2Int pos);
+        PlayfieldItemColorType? GetColor(Vector2Int pos);
         bool IsInBounds(Vector2Int pos);
     }
 }

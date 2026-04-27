@@ -4,8 +4,7 @@ namespace Game
 {
     public class PlayfieldBoard : IBoard
     {
-        readonly PlayfieldItem[,] _items;
-        public Vector2Int Size { get; }
+        private readonly PlayfieldItem[,] _items;
 
         public PlayfieldBoard(Vector2Int size)
         {
@@ -13,20 +12,33 @@ namespace Game
             _items = new PlayfieldItem[size.x, size.y];
         }
 
-        public PlayfieldItem Get(Vector2Int cell) => _items[cell.x, cell.y];
+        public Vector2Int Size { get; }
 
-        public PlayfieldItemColorType? GetType(Vector2Int cell)
+        public PlayfieldItem Get(Vector2Int cell)
+        {
+            return _items[cell.x, cell.y];
+        }
+
+        public PlayfieldItemColorType? GetColor(Vector2Int cell)
         {
             var item = _items[cell.x, cell.y];
             return item?.Color;
         }
 
-        public void Set(Vector2Int cell, PlayfieldItem item) => _items[cell.x, cell.y] = item;
+        public bool IsInBounds(Vector2Int cell)
+        {
+            return cell.x >= 0 && cell.x < Size.x && cell.y >= 0 && cell.y < Size.y;
+        }
 
-        public void Clear(Vector2Int cell) => _items[cell.x, cell.y] = null;
+        public void Set(Vector2Int cell, PlayfieldItem item)
+        {
+            _items[cell.x, cell.y] = item;
+        }
 
-        public bool IsInBounds(Vector2Int cell) =>
-            cell.x >= 0 && cell.x < Size.x && cell.y >= 0 && cell.y < Size.y;
+        public void Clear(Vector2Int cell)
+        {
+            _items[cell.x, cell.y] = null;
+        }
 
         public void Swap(Vector2Int cellA, Vector2Int cellB)
         {

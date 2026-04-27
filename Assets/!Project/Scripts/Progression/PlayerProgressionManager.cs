@@ -1,25 +1,27 @@
 using R3;
 using UnityEngine;
-using static UnityEngine.Audio.GeneratorInstance;
 
 namespace Game
 {
     public class PlayerProgressionManager
     {
-        readonly PlayfieldManager _playfieldManager;
+        private readonly PlayfieldManager _playfieldManager;
+        private MatchShapesConfig _matchShapesConfig;
 
-        PlayerProgressionConfig _progressionConfig;
-        MatchShapesConfig _matchShapesConfig;
-        public ReactiveProperty<int> PlayerLevel { get; private set; } = new(1);
-        public ReactiveProperty<(float current, float required)> PlayerExp { get; private set; } = new((0f, 0f));
+        private PlayerProgressionConfig _progressionConfig;
+
         public PlayerProgressionManager(PlayfieldManager playfieldManager)
         {
             _playfieldManager = playfieldManager;
         }
 
+        public ReactiveProperty<int> PlayerLevel { get; } = new(1);
+        public ReactiveProperty<(float current, float required)> PlayerExp { get; } = new((0f, 0f));
+
         public void Init()
         {
-            _progressionConfig = Resources.Load<PlayerProgressionConfig>("PlayerProgressionConfigs/PlayerProgressionConfig");
+            _progressionConfig =
+                Resources.Load<PlayerProgressionConfig>("PlayerProgressionConfigs/PlayerProgressionConfig");
             _matchShapesConfig = Resources.Load<MatchShapesConfig>("MatchShapesConfigs/MatchShapesConfig");
             _matchShapesConfig.CacheData();
 
@@ -29,41 +31,37 @@ namespace Game
             SetCurrentExp(0);
         }
 
-        void HandleMatchResolved(MatchResolvedEvent matchEvent)
+        private void HandleMatchResolved(MatchResolvedEvent matchEvent)
         {
-            float exp = _matchShapesConfig.GetExpRewardByShapeType(matchEvent.Shape);
+            var exp = _matchShapesConfig.GetExpRewardByShapeType(matchEvent.Shape);
             AddExp(exp);
         }
 
-        void AddExp(float exp)
+        private void AddExp(float exp)
         {
             if (IsLevelUpAvailable())
-            {
                 LevelUp();
-            }
             else
-            {
                 SetCurrentExp(PlayerExp.Value.current + exp);
-            }
         }
 
-        void SetCurrentExp(float exp)
+        private void SetCurrentExp(float exp)
         {
             PlayerExp.Value = (exp, PlayerExp.Value.required);
         }
 
-        bool IsLevelUpAvailable()
+        private bool IsLevelUpAvailable()
         {
             return PlayerExp.Value.current >= PlayerExp.Value.required;
         }
 
-        void LevelUp()
+        private void LevelUp()
         {
             SetCurrentExp(PlayerExp.Value.current - PlayerExp.Value.required);
             SetLevel(PlayerLevel.Value + 1);
         }
 
-        void SetLevel(int level)
+        private void SetLevel(int level)
         {
             PlayerLevel.Value = level;
 

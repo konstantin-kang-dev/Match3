@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.RocketItemConfig
   _kind: 100
   _icon: {fileID: 21300000, guid: 091d0cb0f4ef3684da46f68518907538, type: 3}
-  _prefab: {fileID: 5139931270939773113, guid: c22c90d073cc51949955a0920ee81e4e, type: 3}
+  _prefab: {fileID: 3968146821470479266, guid: e75a3409caf23f44897c66e09bb9f19d, type: 3}
   _flySpeed: 10

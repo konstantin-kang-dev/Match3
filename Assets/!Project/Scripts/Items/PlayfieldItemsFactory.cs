@@ -1,60 +1,65 @@
-﻿using Game.Configs;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using Game.Configs;
 using UnityEngine;
 using VContainer;
+using Object = UnityEngine.Object;
 
 namespace Game
 {
     public class PlayfieldItemsFactory
     {
-        readonly IObjectResolver _resolver;
-        readonly PlayfieldItemsDB _playfieldItemsDB;
+        private readonly PlayfieldItemsDB _db;
+        private readonly IObjectResolver _resolver;
 
-        public PlayfieldItemsFactory(IObjectResolver resolver, PlayfieldItemsDB itemsDB)
+        readonly PowerUpBehaviourFactory _behaviourFactory;
+        
+        public PlayfieldItemsFactory(IObjectResolver resolver, PlayfieldItemsDB itemsDB, PowerUpBehaviourFactory behaviourFactory)
         {
             _resolver = resolver;
-            _playfieldItemsDB = itemsDB;
+            _db = itemsDB;
+            _behaviourFactory = behaviourFactory;
         }
 
         public PlayfieldItem SpawnColored(PlayfieldItemColorType color, Transform parent)
         {
-            var config = _playfieldItemsDB.GetColored(color);
-            return SpawnFromConfig(config, parent);
+            var config = _db.GetColored(color);
+            return SpawnFromConfig(config, null, parent);
         }
 
-        public PlayfieldItem SpawnPowerUp(PlayfieldItemKind kind, Transform parent)
+        public PlayfieldItem SpawnRocket(RocketOrientation orientation, Transform parent)
         {
-            if (kind == PlayfieldItemKind.Colored)
-                throw new System.ArgumentException(
-                    "Use SpawnColored for colored items.", nameof(kind));
-
-            var config = _playfieldItemsDB.Get<PlayfieldItemConfig>(kind);
-            return SpawnFromConfig(config, parent);
+            var config = _db.Get<RocketItemConfig>(PlayfieldItemKind.Rocket);
+            var behaviour = _behaviourFactory.CreateRocket(orientation);
+            return SpawnFromConfig(config, behaviour, parent);
         }
 
-        PlayfieldItem SpawnFromConfig(PlayfieldItemConfig config, Transform parent)
+        public PlayfieldItem SpawnBomb(Transform parent)
         {
-            var view = GameObject.Instantiate(config.Prefab, parent).GetComponent<PlayfieldItemView>();
+            var config = _db.Get<BombItemConfig>(PlayfieldItemKind.Bomb);
+            var behaviour = _behaviourFactory.CreateBomb(config);
+            return SpawnFromConfig(config, behaviour, parent);
+        }
+
+        public PlayfieldItem SpawnPlane(Transform parent)
+        {
+            var config = _db.Get<PlaneItemConfig>(PlayfieldItemKind.Plane);
+            var behaviour = _behaviourFactory.CreatePlane(config);
+            return SpawnFromConfig(config, behaviour, parent);
+        }
+
+        public PlayfieldItem SpawnDisco(Transform parent)
+        {
+            var config = _db.Get<DiscoItemConfig>(PlayfieldItemKind.Disco);
+            var behaviour = _behaviourFactory.CreateDisco(config);
+            return SpawnFromConfig(config, behaviour, parent);
+        }
+
+        PlayfieldItem SpawnFromConfig(PlayfieldItemConfig config, IPowerUpBehaviour behaviour, Transform parent)
+        {
+            var view = Object.Instantiate(config.Prefab, parent).GetComponent<PlayfieldItemView>();
             var item = _resolver.Resolve<PlayfieldItem>();
-
-            var behaviour = CreatePowerUpBehaviour(config);
             item.Init(config, view, behaviour);
-
             return item;
         }
-
-        IPowerUpBehaviour CreatePowerUpBehaviour(PlayfieldItemConfig config) => config switch
-        {
-            /*
-            RocketItemConfig rocket => new RocketBehaviour(rocket.FlySpeed),
-            BombItemConfig bomb => new BombBehaviour(bomb.ExplosionRadius),
-            PaperPlaneItemConfig plane => new PaperPlaneBehaviour(plane.FlySpeed, plane.TargetsCount),
-            RainbowBallItemConfig ball => new RainbowBallBehaviour(ball.BeamSpeed),
-            ColoredItemConfig => null,
-            */
-            _ => null
-        };
     }
 }

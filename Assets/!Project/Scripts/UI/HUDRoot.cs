@@ -3,5 +3,5 @@ using UnityEngine;
 
 public class HUDRoot : MonoBehaviour
 {
-    [field: SerializeField] public PlayerLevelUIView PlayerLevelUIView {  get; private set; }
+    [field: SerializeField] public PlayerLevelUIView PlayerLevelUIView { get; private set; }
 }

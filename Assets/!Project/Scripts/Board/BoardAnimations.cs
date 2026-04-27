@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Game
 {
@@ -10,7 +7,8 @@ namespace Game
         public readonly PlayfieldItem Item;
         public readonly Vector2Int FromCell;
         public readonly Vector2Int ToCell;
-        public readonly bool IsNew; 
+        public readonly bool IsNew;
+
         public CellMovement(PlayfieldItem item, Vector2Int fromCell, Vector2Int toCell, bool isNew)
         {
             Item = item;
@@ -25,6 +23,7 @@ namespace Game
         public readonly PlayfieldItem Item;
         public readonly Vector2 Direction;
         public readonly float Force;
+
         public ExplosionReaction(PlayfieldItem item, Vector2 direction, float force)
         {
             Item = item;
