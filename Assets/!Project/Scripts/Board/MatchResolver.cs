@@ -11,7 +11,7 @@ namespace Game
     {
         private readonly BoardMutator _mutator;
         private readonly GridManager _gridManager;
-        private readonly IBoard _board;
+        private readonly BoardState _board;
         private readonly IBoardContext _boardContext;
         private readonly PowerUpAnimator _powerUpAnimator;
         
@@ -23,7 +23,7 @@ namespace Game
             GridManager gridManager,
             IBoardContext boardContext,
             PowerUpAnimator powerUpAnimator,
-            IBoard board)
+            BoardState board)
         {
             _mutator = mutator;
             _gridManager = gridManager;
@@ -63,12 +63,12 @@ namespace Game
             var items = new List<PlayfieldItem>();
             foreach (var cell in group.Cells)
             {
-                var item = _board.Get(cell);
-                if (item != null) items.Add(item);
+                var slot = _board.Get(cell);
+                if (slot.Item != null) items.Add(slot.Item);
             }
 
             foreach (var cell in group.Cells)
-                _board.Clear(cell);
+                _board.Get(cell).SetEmpty();
 
             Vector2 targetPos = _gridManager.GetPositionForCell(spawn.Cell);
             await _powerUpAnimator.PlayMergeAnimation(items, targetPos);

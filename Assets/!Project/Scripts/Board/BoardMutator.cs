@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using DG.Tweening;
 using Game.Utils;
 using R3;
 using UnityEngine;
@@ -8,14 +9,14 @@ namespace Game
 {
     public class BoardMutator
     {
-        private readonly IBoard _board;
+        private readonly BoardState _board;
         private readonly PlayfieldItemsFactory _factory;
         private readonly GridManager _gridManager;
         private readonly IVfxService _vfxService;
         private readonly PowerUpAnimator _animator;
-        
+
         public BoardMutator(
-            IBoard board,
+            BoardState board,
             PlayfieldItemsFactory factory,
             GridManager gridManager,
             IVfxService vfxService,
@@ -34,17 +35,28 @@ namespace Game
             DestroyMode mode = DestroyMode.Animated,
             bool playVfx = true)
         {
-            var powerUpsToActivate = new List<PlayfieldItem>();
+            var powerUpsToActivate = new List<(PlayfieldItem item, CellSlot slot)>();
+            var slotsToFinalize = new List<CellSlot>();
 
             foreach (var cell in cells)
             {
-                var item = _board.Get(cell);
+                var slot = _board.Get(cell);
+
+                // Кто-то уже уничтожает или клетка пуста — пропускаем
+                if (slot.State == CellState.Destroying || slot.State == CellState.Empty) continue;
+
+                var item = slot.Item;
                 if (item == null) continue;
-                _board.Clear(cell);
+
+                // Падающая клетка — отменяем tween, чтобы остановить визуальное падение
+                if (slot.State == CellState.Falling)
+                    item.RectTransform.DOKill();
+
+                slot.SetDestroying();
 
                 if (item.IsPowerUp)
                 {
-                    powerUpsToActivate.Add(item);
+                    powerUpsToActivate.Add((item, slot));
                 }
                 else
                 {
@@ -58,17 +70,24 @@ namespace Game
                     }
 
                     item.DestroyItem(mode);
+                    slotsToFinalize.Add(slot);
                 }
             }
 
             if (mode == DestroyMode.Animated)
                 await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
 
-            foreach (var powerUp in powerUpsToActivate)
+            // Освобождаем слоты обычных фишек — это запустит реакцию колонок
+            foreach (var slot in slotsToFinalize)
+                slot.SetEmpty();
+
+            // Активируем PowerUp'ы
+            foreach (var (powerUp, slot) in powerUpsToActivate)
             {
                 var ctx = new ActivationContext(powerUp.OccupiedCell, powerUp);
                 await powerUp.PowerUp.Activate(ctx, context);
                 powerUp.DestroyItem(DestroyMode.Instant);
+                slot.SetEmpty();
             }
         }
 
@@ -114,18 +133,22 @@ namespace Game
 
         void DestroyExistingAt(Vector2Int cell)
         {
-            var existing = _board.Get(cell);
-            if (existing == null) return;
-            _board.Clear(cell);
+            var slot = _board.Get(cell);
+            if (slot.Item == null) return;
+
+            var existing = slot.Item;
+            slot.SetDestroying();
             existing.DestroyItem(DestroyMode.Instant);
+            slot.SetEmpty();
         }
 
         void PlaceAt(Vector2Int cell, PlayfieldItem item)
         {
-            _board.Set(cell, item);
+            var slot = _board.Get(cell);
             item.OccupyCell(cell);
             var pos = _gridManager.GetPositionForCell(cell);
             item.MoveTo(pos, MoveAnimationType.None);
+            slot.SetOccupied(item);
         }
     }
 }

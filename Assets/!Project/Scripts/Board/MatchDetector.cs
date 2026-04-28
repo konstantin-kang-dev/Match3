@@ -10,12 +10,22 @@ namespace Game
             Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
         };
 
-        private readonly IBoard _board;
+        readonly BoardState _board;
 
-        public MatchDetector(IBoard board)
+        public MatchDetector(BoardState board)
         {
             _board = board;
         }
+
+        PlayfieldItemColorType? GetColor(Vector2Int pos)
+        {
+            var slot = _board.Get(pos);
+            // Только Occupied клетки участвуют в матче (Falling — ещё летит, нельзя матчить)
+            if (slot.State != CellState.Occupied) return null;
+            return slot.Item?.Color;
+        }
+
+        bool IsInBounds(Vector2Int pos) => _board.IsInBounds(pos);
 
         public List<MatchGroup> FindMatches(IEnumerable<Vector2Int> changedCells)
         {
@@ -64,7 +74,7 @@ namespace Game
             {
                 if (visited.Contains(start)) continue;
 
-                var type = _board.GetColor(start);
+                var type = GetColor(start);
                 if (!type.HasValue) continue;
 
                 var component = new List<Vector2Int>();
@@ -82,7 +92,7 @@ namespace Game
                         var neighbor = cell + dir;
                         if (!matched.Contains(neighbor)) continue;
                         if (visited.Contains(neighbor)) continue;
-                        if (_board.GetColor(neighbor) != type) continue;
+                        if (GetColor(neighbor) != type) continue;
 
                         visited.Add(neighbor);
                         queue.Enqueue(neighbor);
@@ -114,8 +124,8 @@ namespace Game
             var prev = pos - dir;
             if (_board.IsInBounds(prev))
             {
-                var prevType = _board.GetColor(prev);
-                var curType = _board.GetColor(pos);
+                var prevType = GetColor(prev);
+                var curType = GetColor(pos);
                 if (prevType.HasValue && curType.HasValue && prevType == curType) return;
             }
 
@@ -124,9 +134,9 @@ namespace Game
 
             while (_board.IsInBounds(current))
             {
-                var type = _board.GetColor(current);
+                var type = GetColor(current);
                 if (!type.HasValue) break;
-                if (run.Count > 0 && _board.GetColor(run[0]) != type) break;
+                if (run.Count > 0 && GetColor(run[0]) != type) break;
 
                 run.Add(current);
                 current += dir;
@@ -147,10 +157,10 @@ namespace Game
             if (!_board.IsInBounds(c10) || !_board.IsInBounds(c01) || !_board.IsInBounds(c11))
                 return;
 
-            var t00 = _board.GetColor(c00);
-            var t10 = _board.GetColor(c10);
-            var t01 = _board.GetColor(c01);
-            var t11 = _board.GetColor(c11);
+            var t00 = GetColor(c00);
+            var t10 = GetColor(c10);
+            var t01 = GetColor(c01);
+            var t11 = GetColor(c11);
 
             if (!t00.HasValue) return;
             if (t00 != t10 || t00 != t01 || t00 != t11) return;

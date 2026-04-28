@@ -31,4 +31,17 @@ namespace Game
             Force = force;
         }
     }
+    public readonly struct FallStartedEvent
+    {
+        public readonly PlayfieldItem Item;
+        public readonly Vector2Int FromCell;
+        public readonly Vector2Int ToCell;
+
+        public FallStartedEvent(PlayfieldItem item, Vector2Int fromCell, Vector2Int toCell)
+        {
+            Item = item;
+            FromCell = fromCell;
+            ToCell = toCell;
+        }
+    }
 }
