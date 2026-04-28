@@ -10,24 +10,27 @@ namespace Game
     {
         private readonly int _explosionRadius;
         private readonly IVfxService _vfxService;
-
-        public BombBehaviour(int explosionRadius, IVfxService vfxService)
+        private readonly PowerUpAnimator _animator;
+        public BombBehaviour(int explosionRadius, IVfxService vfxService, PowerUpAnimator animator)
         {
             _explosionRadius = explosionRadius;
             _vfxService = vfxService;
+            _animator = animator;
         }
 
         public async UniTask Activate(ActivationContext activationContext, IBoardContext context)
         {
+            await _animator.PlayBombActivation(activationContext.Self);
+            
             var origin = activationContext.Origin;
-            Vector2 pos = context.GetWorldPosition(origin);
-            _vfxService.Play(PlayfieldVfxType.BombActivate, pos);
+            
+            _vfxService.PlayAtCell(PlayfieldVfxType.BombActivate, origin);
 
             var waveTasks = new List<UniTask>();
             for (int ring = 0; ring <= _explosionRadius; ring++)
             {
                 var cells = GetRingCells(activationContext.Origin, ring, context);
-                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, ring * 0.05f));
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, ring * 0.07f));
             }
 
             await UniTask.WhenAll(waveTasks);
@@ -56,7 +59,7 @@ namespace Game
         {
             if (delay > 0f)
                 await UniTask.Delay(TimeSpan.FromSeconds(delay));
-            await context.DestroyCells(cells);
+            await context.DestroyCells(cells, DestroyMode.Instant);
         }
     }
 }

@@ -4,7 +4,7 @@
     {
         // Match (0-99)
         MatchDestroy = 0,
-
+        
         // Rocket (100-199)
         RocketSpawn = 100,
         RocketActivateHorizontal = 101,
@@ -37,5 +37,8 @@
         ComboPlanePlane = 507,
         ComboPlaneDisco = 508,
         ComboDiscoDisco = 509,
+        
+        // Others (600-699)
+        PowerUpSpawn = 600,
     }
 }

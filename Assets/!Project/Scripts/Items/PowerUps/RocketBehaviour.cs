@@ -16,23 +16,26 @@ namespace Game
     {
         public readonly RocketOrientation Orientation;
         private readonly IVfxService _vfxService;
+        private readonly PowerUpAnimator _animator;
         
-        public RocketBehaviour(RocketOrientation orientation, IVfxService vfxService)
+        public RocketBehaviour(RocketOrientation orientation, IVfxService vfxService, PowerUpAnimator animator)
         {
             Orientation = orientation;
             _vfxService = vfxService;
+            _animator = animator;
         }
         
         public async UniTask Activate(ActivationContext activationContext, IBoardContext context)
         {
+            await _animator.PlayRocketActivation(activationContext.Self);
+            
             var origin = activationContext.Origin;
     
             var vfxType = Orientation == RocketOrientation.Horizontal
                 ? PlayfieldVfxType.RocketActivateHorizontal
                 : PlayfieldVfxType.RocketActivateVertical;
 
-            Vector2 pos = context.GetWorldPosition(origin);
-            _vfxService.Play(vfxType, pos);
+            _vfxService.PlayAtCell(vfxType, origin);
 
             if (Orientation == RocketOrientation.Horizontal)
                 await DestroyHorizontalWaves(origin, context);
@@ -43,6 +46,8 @@ namespace Game
         async UniTask DestroyHorizontalWaves(Vector2Int origin, IBoardContext context)
         {
             int maxDist = Mathf.Max(origin.x, context.Size.x - origin.x - 1);
+            var waveTasks = new List<UniTask>();
+    
             for (int dist = 0; dist <= maxDist; dist++)
             {
                 var cells = new List<Vector2Int>();
@@ -50,35 +55,37 @@ namespace Game
                 var right = new Vector2Int(origin.x + dist, origin.y);
                 if (context.IsValidCell(left)) cells.Add(left);
                 if (dist != 0 && context.IsValidCell(right)) cells.Add(right);
-                
-                FireDestroyAsync(cells, context).Forget();
-        
-                await UniTask.Delay(TimeSpan.FromSeconds(0.04f));
+
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.04f));
             }
-            
-            await UniTask.Delay(TimeSpan.FromSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION));
+
+            await UniTask.WhenAll(waveTasks);
         }
         
         async UniTask DestroyVerticalWaves(Vector2Int origin, IBoardContext context)
         {
             int maxDist = Mathf.Max(origin.y, context.Size.y - origin.y - 1);
+            var waveTasks = new List<UniTask>();
+
             for (int dist = 0; dist <= maxDist; dist++)
             {
                 var cells = new List<Vector2Int>();
-                var left = new Vector2Int(origin.x, origin.y - dist);
-                var right = new Vector2Int(origin.x, origin.y + dist);
-                if (context.IsValidCell(left)) cells.Add(left);
-                if (dist != 0 && context.IsValidCell(right)) cells.Add(right);
-                
-                FireDestroyAsync(cells, context).Forget();
-        
-                await UniTask.Delay(TimeSpan.FromSeconds(0.04f));
+                var down = new Vector2Int(origin.x, origin.y - dist);
+                var up = new Vector2Int(origin.x, origin.y + dist);
+                if (context.IsValidCell(down)) cells.Add(down);
+                if (dist != 0 && context.IsValidCell(up)) cells.Add(up);
+
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.04f));
             }
-            
-            await UniTask.Delay(TimeSpan.FromSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION));
+
+            await UniTask.WhenAll(waveTasks);
         }
-        
-        UniTask FireDestroyAsync(List<Vector2Int> cells, IBoardContext context)
-            => context.DestroyCells(cells);
+
+        async UniTask FireDestroyWithDelayAsync(List<Vector2Int> cells, IBoardContext context, float delay)
+        {
+            if (delay > 0f)
+                await UniTask.Delay(TimeSpan.FromSeconds(delay));
+            await context.DestroyCells(cells, DestroyMode.Instant);
+        }
     }
 }

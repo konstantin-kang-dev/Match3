@@ -26,10 +26,19 @@ public class SceneInstaller : LifetimeScope
             .AsSelf()
             .As<ISwapRequester>();
         
+        builder.Register(resolver =>
+                new PlayfieldBoard(resolver.Resolve<GridManager>().GridSize),
+            Lifetime.Singleton).As<IBoard>();
+
+        builder.Register<MatchDetector>(Lifetime.Singleton);
         builder.Register<BoardMutator>(Lifetime.Singleton);
         builder.Register<BoardContext>(Lifetime.Singleton).As<IBoardContext>();
-        
+        builder.Register<MatchResolver>(Lifetime.Singleton);
+        builder.Register<BoardCollapser>(Lifetime.Singleton);
+        builder.Register<BoardFiller>(Lifetime.Singleton);
+        builder.Register<PlayfieldAnimator>(Lifetime.Singleton);
         builder.Register<PlayfieldVfxService>(Lifetime.Singleton).As<IVfxService>();
+        builder.Register<PowerUpAnimator>(Lifetime.Singleton);
         
         builder.RegisterComponentInHierarchy<HUDRoot>();
         builder.Register(resolver => resolver.Resolve<HUDRoot>().PlayerLevelUIView, Lifetime.Singleton);

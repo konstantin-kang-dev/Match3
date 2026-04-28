@@ -5,9 +5,9 @@ namespace Game
 {
     public class BoardCollapser
     {
-        private readonly PlayfieldBoard _board;
+        private readonly IBoard _board;
 
-        public BoardCollapser(PlayfieldBoard board)
+        public BoardCollapser(IBoard board)
         {
             _board = board;
         }

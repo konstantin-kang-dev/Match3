@@ -12,9 +12,29 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 94f6f5d3387d43343a36a2e51c41788d, type: 3}
+    - target: {fileID: 1615755047554555567, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: e19d8acbe3cc0b54e85c341409afa882, type: 2}
     - target: {fileID: 2562336379352237832, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Name
       value: PowerUpBomb
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8713765872291728855, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Pivot.x

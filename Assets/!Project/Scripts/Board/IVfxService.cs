@@ -7,5 +7,6 @@ namespace Game
     {
         void Init(Transform container);
         void Play(PlayfieldVfxType type, Vector2 position, Transform overrideParent = null);
+        void PlayAtCell(PlayfieldVfxType type, Vector2Int cell);
     }
 }

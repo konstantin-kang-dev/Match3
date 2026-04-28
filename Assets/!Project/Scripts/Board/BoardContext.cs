@@ -7,11 +7,11 @@ namespace Game
 {
     public class BoardContext : IBoardContext
     {
-        private readonly PlayfieldBoard _board;
+        private readonly IBoard _board;
         private readonly BoardMutator _mutator;
         private readonly GridManager _gridManager;
 
-        public BoardContext(PlayfieldBoard board, BoardMutator mutator, GridManager gridManager)
+        public BoardContext(IBoard board, BoardMutator mutator, GridManager gridManager)
         {
             _board = board;
             _mutator = mutator;
@@ -23,8 +23,8 @@ namespace Game
         public bool IsValidCell(Vector2Int cell)
             => _board.IsInBounds(cell);
 
-        public UniTask DestroyCells(IEnumerable<Vector2Int> cells)
-            => _mutator.DestroyCells(cells, this);
+        public UniTask DestroyCells(IEnumerable<Vector2Int> cells, DestroyMode mode = DestroyMode.Animated, bool playVfx = true)
+            => _mutator.DestroyCells(cells, this, mode, playVfx);
         
         public IEnumerable<Vector2Int> GetCellsInRadius(Vector2Int center, int radius)
         {

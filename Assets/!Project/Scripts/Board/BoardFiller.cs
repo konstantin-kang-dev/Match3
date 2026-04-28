@@ -7,11 +7,11 @@ namespace Game
 {
     public class BoardFiller
     {
-        private readonly PlayfieldBoard _board;
+        private readonly IBoard _board;
         private readonly PlayfieldItemsFactory _factory;
         private readonly GridManager _gridManager;
 
-        public BoardFiller(PlayfieldBoard board, GridManager gridManager, PlayfieldItemsFactory factory)
+        public BoardFiller(IBoard board, GridManager gridManager, PlayfieldItemsFactory factory)
         {
             _board = board;
             _gridManager = gridManager;
@@ -74,6 +74,7 @@ namespace Game
 
             _board.Set(cell, item);
             item.OccupyCell(cell);
+            item.Hide();
 
             return item;
         }

@@ -8,7 +8,7 @@ namespace Game
     {
         Vector2Int Size { get; }
         bool IsValidCell(Vector2Int cell);
-        UniTask DestroyCells(IEnumerable<Vector2Int> cells);    
+        UniTask DestroyCells(IEnumerable<Vector2Int> cells, DestroyMode mode = DestroyMode.Animated, bool playVfx = true);
         IEnumerable<Vector2Int> GetCellsInRadius(Vector2Int center, int radius);
         Vector2Int? FindRandomColoredCell();
         IEnumerable<Vector2Int> GetCellsByColor(PlayfieldItemColorType color);

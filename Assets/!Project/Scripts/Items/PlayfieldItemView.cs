@@ -1,4 +1,6 @@
-﻿using DG.Tweening;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using Game;
 using Game.Configs;
 using R3;
 using UnityEngine;
@@ -17,23 +19,25 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
 {
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private Image _icon;
-    [SerializeField] private ParticleSystem _collapseVFX;
     [SerializeField] private Sprite _alternativeSprite;
     private Sprite _initialSprite;
     
+    [SerializeField] private RectTransform _rectTransform;
+    public RectTransform RectTransform => _rectTransform;
+    
     private Vector2 _dragStartPos = Vector2.zero;
     private bool _isDragged;
-    private RectTransform _rectTransform;
-
+    
     private Sequence _spawnAnim;
-    public Subject<bool> OnDestroyed = new();
-
-    public Subject<Vector2Int> OnSwapRequest = new();
-
+    private Subject<bool> _onDestroyed = new();
+    public Observable<bool> OnDestroyed => _onDestroyed;
+    
+    private Subject<Vector2Int> _onSwapRequest = new();
+    public Observable<Vector2Int> OnSwapRequest => _onSwapRequest;
     private void OnDestroy()
     {
-        OnSwapRequest.Dispose();
-        OnDestroyed.Dispose();
+        _onSwapRequest.Dispose();
+        _onDestroyed.Dispose();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -61,30 +65,27 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void Init(PlayfieldItemConfig config)
     {
-        _rectTransform = GetComponent<RectTransform>();
         _initialSprite = _icon.sprite;
-        SetVisibility(false);
     }
 
-    public void SetVisibility(bool visible)
+    public void Hide()
     {
-        if (visible)
-        {
-            if (_spawnAnim != null) _spawnAnim.Kill();
+        _canvasGroup.alpha = 0f;
+    }
+    public UniTask PlaySpawnAnimation()
+    {
+        if (_spawnAnim != null) _spawnAnim.Kill();
 
-            _spawnAnim = DOTween.Sequence();
+        _spawnAnim = DOTween.Sequence();
 
-            Tween fadeAnim = _canvasGroup.DOFade(1f, ProjectConstants.ITEM_SPAWN_ANIM_DURATION).From(0f)
-                .SetEase(Ease.InQuad);
-            _spawnAnim.Append(fadeAnim);
-            Tween scaleAnim = _rectTransform.DOScale(1f, ProjectConstants.ITEM_SPAWN_ANIM_DURATION).From(0.5f)
-                .SetEase(Ease.InQuad);
-            _spawnAnim.Join(scaleAnim);
-        }
-        else
-        {
-            _canvasGroup.alpha = 0f;
-        }
+        Tween fadeAnim = _canvasGroup.DOFade(1f, ProjectConstants.ITEM_SPAWN_ANIM_DURATION).From(0f)
+            .SetEase(Ease.InQuad);
+        _spawnAnim.Append(fadeAnim);
+        Tween scaleAnim = _rectTransform.DOScale(1f, ProjectConstants.ITEM_SPAWN_ANIM_DURATION).From(0.5f)
+            .SetEase(Ease.InQuad);
+        _spawnAnim.Join(scaleAnim);
+
+        return UniTask.WaitForSeconds(ProjectConstants.ITEM_SPAWN_ANIM_DURATION);
     }
 
     public void SetAlternativeSprite(bool setAlternative)
@@ -142,17 +143,21 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
         }
     }
 
-    public void AnimateDestroy()
+    public void Destroy(DestroyMode mode)
     {
-        _rectTransform
+        Tween destroyAnim = _rectTransform
             .DOScale(Vector3.zero, ProjectConstants.ITEM_DESTROY_ANIM_DURATION)
             .SetEase(Ease.OutSine)
             .OnComplete(() =>
             {
-                _collapseVFX.Play();
-                OnDestroyed.OnNext(true);
+                _onDestroyed.OnNext(true);
                 Destroy(gameObject, 2f);
             });
+
+        if (mode == DestroyMode.Instant)
+        {
+            destroyAnim.Complete();
+        }
     }
 
     private void HandleDrag(Vector2 dragPos)
@@ -160,6 +165,6 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
         var delta = dragPos - _dragStartPos;
         var direction = ProjectUtils.GetSwipeDirection(delta);
 
-        OnSwapRequest.OnNext(direction);
+        _onSwapRequest.OnNext(direction);
     }
 }

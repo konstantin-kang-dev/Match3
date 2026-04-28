@@ -41,7 +41,7 @@ namespace Game
             {
                 var targetPos = _gridManager.GetPositionForCell(movementData.ToCell);
                 movementData.Item.MoveTo(targetPos, MoveAnimationType.Bounce);
-                if(movementData.IsNew) movementData.Item.SetVisibility(true);
+                if(movementData.IsNew) movementData.Item.PlaySpawnAnimation();
 
                 await UniTask.Delay(TimeSpan.FromSeconds(FallInterval));
             }

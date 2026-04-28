@@ -1,24 +1,38 @@
 ﻿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using Game.Utils;
+using R3;
 using UnityEngine;
 
 namespace Game
 {
     public class BoardMutator
     {
-        readonly PlayfieldBoard _board;
-        readonly PlayfieldItemsFactory _factory;
-        readonly GridManager _gridManager;
-
-        public BoardMutator(PlayfieldBoard board, PlayfieldItemsFactory factory, GridManager gridManager)
+        private readonly IBoard _board;
+        private readonly PlayfieldItemsFactory _factory;
+        private readonly GridManager _gridManager;
+        private readonly IVfxService _vfxService;
+        private readonly PowerUpAnimator _animator;
+        
+        public BoardMutator(
+            IBoard board,
+            PlayfieldItemsFactory factory,
+            GridManager gridManager,
+            IVfxService vfxService,
+            PowerUpAnimator animator)
         {
             _board = board;
             _factory = factory;
             _gridManager = gridManager;
+            _vfxService = vfxService;
+            _animator = animator;
         }
 
-        public async UniTask DestroyCells(IEnumerable<Vector2Int> cells, IBoardContext context)
+        public async UniTask DestroyCells(
+            IEnumerable<Vector2Int> cells,
+            IBoardContext context,
+            DestroyMode mode = DestroyMode.Animated,
+            bool playVfx = true)
         {
             var powerUpsToActivate = new List<PlayfieldItem>();
 
@@ -29,19 +43,32 @@ namespace Game
                 _board.Clear(cell);
 
                 if (item.IsPowerUp)
+                {
                     powerUpsToActivate.Add(item);
+                }
                 else
-                    item.DestroyItem();
+                {
+                    if (playVfx)
+                    {
+                        var capturedCell = cell;
+                        item.OnDestroyed.Subscribe(_ =>
+                        {
+                            _vfxService.PlayAtCell(PlayfieldVfxType.MatchDestroy, capturedCell);
+                        });
+                    }
+
+                    item.DestroyItem(mode);
+                }
             }
 
-            await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
+            if (mode == DestroyMode.Animated)
+                await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
 
             foreach (var powerUp in powerUpsToActivate)
             {
-                var ctx = new ActivationContext(powerUp.OccupiedCell);
-                
+                var ctx = new ActivationContext(powerUp.OccupiedCell, powerUp);
                 await powerUp.PowerUp.Activate(ctx, context);
-                powerUp.DestroyItem();
+                powerUp.DestroyItem(DestroyMode.Instant);
             }
         }
 
@@ -49,7 +76,8 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnRocket(orientation, _gridManager.PlayfieldItemsContainer);
-            item.SetVisibility(true);
+            _animator.PlayRocketSpawn(item);
+            _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
         }
@@ -58,7 +86,8 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnBomb(_gridManager.PlayfieldItemsContainer);
-            item.SetVisibility(true);
+            _animator.PlayBombSpawn(item);
+            _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
         }
@@ -67,7 +96,8 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnPlane(_gridManager.PlayfieldItemsContainer);
-            item.SetVisibility(true);
+            _animator.PlayPlaneSpawn(item);
+            _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
         }
@@ -76,7 +106,8 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnDisco(_gridManager.PlayfieldItemsContainer);
-            item.SetVisibility(true);
+            _animator.PlayDiscoSpawn(item);
+            _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
         }
@@ -86,7 +117,7 @@ namespace Game
             var existing = _board.Get(cell);
             if (existing == null) return;
             _board.Clear(cell);
-            existing.DestroyItem();
+            existing.DestroyItem(DestroyMode.Instant);
         }
 
         void PlaceAt(Vector2Int cell, PlayfieldItem item)

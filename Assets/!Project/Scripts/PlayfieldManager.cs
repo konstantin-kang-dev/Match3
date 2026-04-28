@@ -9,43 +9,66 @@ namespace Game
 {
     public class PlayfieldManager : ISwapRequester
 {
-    readonly GridManager _gridManager;
-    readonly PlayfieldItemsFactory _factory;
+    private readonly GridManager _gridManager;
+    private readonly PlayfieldItemsFactory _factory;
+    private readonly IVfxService _vfxService;
+    private readonly PowerUpAnimator _powerUpAnimator;
+    
+    private readonly IBoard _board;
+    private readonly MatchDetector _matchDetector;
+    private readonly MatchResolver _matchResolver;
+    private readonly BoardMutator _boardMutator;
 
-    PlayfieldBoard _board;
-    MatchDetector _matchDetector;
-    MatchResolver _matchResolver;
-    BoardMutator _boardMutator;
-    BoardContext _boardContext;
-    BoardCollapser _collapser;
-    BoardFiller _filler;
-    PlayfieldAnimator _playfieldAnimator;
-
+    private readonly IBoardContext _boardContext;
+    private readonly BoardCollapser _collapser;
+    private readonly BoardFiller _filler;
+    private readonly PlayfieldAnimator _playfieldAnimator;
+    
     public Observable<MatchResolvedEvent> OnMatchResolved => _matchResolver.OnMatchResolved;
 
-    public bool IsMatching { get; private set; }
+    private bool IsMatching = false;
 
-    Vector2Int _lastSwapFrom;
-    Vector2Int _lastSwapTo;
+    private Vector2Int _lastSwapFrom;
+    private Vector2Int _lastSwapTo;
 
-    public PlayfieldManager(GridManager gridManager, PlayfieldItemsFactory factory)
+    //DEBUG
+#if UNITY_EDITOR
+    public BoardMutator BoardMutator => _boardMutator;
+    public IBoardContext BoardContext => _boardContext;
+#endif
+    
+    public PlayfieldManager(
+        GridManager gridManager,
+        PlayfieldItemsFactory factory,
+        IBoard board,
+        MatchDetector matchDetector,
+        BoardMutator boardMutator,
+        IBoardContext boardContext,
+        MatchResolver matchResolver,
+        BoardCollapser collapser,
+        BoardFiller filler,
+        PlayfieldAnimator playfieldAnimator,
+        IVfxService vfxService,
+        PowerUpAnimator powerUpAnimator)
     {
         _gridManager = gridManager;
         _factory = factory;
+        _powerUpAnimator = powerUpAnimator;
+        _board = board;
+        _matchDetector = matchDetector;
+        _boardMutator = boardMutator;
+        _boardContext = boardContext;
+        _matchResolver = matchResolver;
+        _collapser = collapser;
+        _filler = filler;
+        _playfieldAnimator = playfieldAnimator;
+        _vfxService = vfxService;
     }
 
     public async UniTask Init()
     {
         IsMatching = true;
-        _board = new PlayfieldBoard(_gridManager.GridSize);
-        _matchDetector = new MatchDetector(_board);
-        _boardMutator = new BoardMutator(_board, _factory, _gridManager);
-        _boardContext = new BoardContext(_board, _boardMutator, _gridManager);
-        _matchResolver = new MatchResolver(_boardMutator, _gridManager, _boardContext);
-        _collapser = new BoardCollapser(_board);
-        _filler = new BoardFiller(_board, _gridManager, _factory);
-        _playfieldAnimator = new PlayfieldAnimator(_gridManager);
-
+        
         var refillMovements = _filler.Refill();
         await _playfieldAnimator.AnimateFall(refillMovements);
         IsMatching = false;
@@ -120,12 +143,12 @@ namespace Game
             IsMatching = false;
         }
     }
+    
     async UniTask HandlePowerUpSwap(Vector2Int from, Vector2Int to, PlayfieldItem powerUp)
     {
         IsMatching = true;
         try
         {
-            // Определяем цвет цели до свапа
             var targetItem = _board.Get(from) == powerUp ? _board.Get(to) : _board.Get(from);
             var swappedColor = targetItem?.Color;
 
@@ -135,10 +158,10 @@ namespace Game
             Vector2Int activationCell = powerUp.OccupiedCell;
             _board.Clear(activationCell);
 
-            var activationContext = new ActivationContext(activationCell, swappedColor);
+            var activationContext = new ActivationContext(activationCell, powerUp, swappedColor);
             await powerUp.PowerUp.Activate(activationContext, _boardContext);
 
-            powerUp.DestroyItem();
+            powerUp.DestroyItem(DestroyMode.Instant);
 
             await ProcessCascadeAfterMutation();
         }
@@ -147,6 +170,7 @@ namespace Game
             IsMatching = false;
         }
     }
+    
     async UniTask ProcessCascadeAfterMutation()
     {
         int cascade = 0;

@@ -9,18 +9,27 @@ namespace Game
 {
     public class MatchResolver
     {
-        readonly BoardMutator _mutator;
-        readonly GridManager _gridManager;
-        readonly IBoardContext _boardContext;
+        private readonly BoardMutator _mutator;
+        private readonly GridManager _gridManager;
+        private readonly IBoard _board;
+        private readonly IBoardContext _boardContext;
+        private readonly PowerUpAnimator _powerUpAnimator;
         
-        readonly Subject<MatchResolvedEvent> _onMatchResolved = new();
+        private readonly Subject<MatchResolvedEvent> _onMatchResolved = new();
         public Observable<MatchResolvedEvent> OnMatchResolved => _onMatchResolved.AsObservable();
 
-        public MatchResolver(BoardMutator mutator, GridManager gridManager, IBoardContext boardContext)
+        public MatchResolver(
+            BoardMutator mutator,
+            GridManager gridManager,
+            IBoardContext boardContext,
+            PowerUpAnimator powerUpAnimator,
+            IBoard board)
         {
             _mutator = mutator;
             _gridManager = gridManager;
+            _board = board;
             _boardContext =  boardContext;
+            _powerUpAnimator = powerUpAnimator;
         }
 
         public async UniTask Resolve(List<MatchGroup> groups, Vector2Int? swapCell, int cascade)
@@ -28,18 +37,62 @@ namespace Game
             EmitEvents(groups, cascade);
 
             var spawns = ResolveSpawns(groups, swapCell);
-            var spawnCells = new HashSet<Vector2Int>(spawns.Select(s => s.Cell));
+            var spawnsByGroup = MapSpawnsToGroups(groups, spawns);
 
-            foreach (var spawn in spawns)
-                ExecuteSpawn(spawn);
+            var mergeTasks = new List<UniTask>();
+            var cellsForRegularDestroy = new List<Vector2Int>();
 
-            var cellsToDestroy = new List<Vector2Int>();
             foreach (var group in groups)
-                foreach (var cell in group.Cells)
-                    if (!spawnCells.Contains(cell))
-                        cellsToDestroy.Add(cell);
+            {
+                if (spawnsByGroup.TryGetValue(group, out var spawn))
+                {
+                    mergeTasks.Add(PlayMergeAndSpawn(group, spawn));
+                }
+                else
+                {
+                    cellsForRegularDestroy.AddRange(group.Cells);
+                }
+            }
 
-            await _mutator.DestroyCells(cellsToDestroy, _boardContext);
+            var destroyTask = _mutator.DestroyCells(cellsForRegularDestroy, _boardContext, DestroyMode.Animated, playVfx: true);
+
+            await UniTask.WhenAll(UniTask.WhenAll(mergeTasks), destroyTask);
+        }
+        async UniTask PlayMergeAndSpawn(MatchGroup group, PowerUpSpawnPlan spawn)
+        {
+            var items = new List<PlayfieldItem>();
+            foreach (var cell in group.Cells)
+            {
+                var item = _board.Get(cell);
+                if (item != null) items.Add(item);
+            }
+
+            foreach (var cell in group.Cells)
+                _board.Clear(cell);
+
+            Vector2 targetPos = _gridManager.GetPositionForCell(spawn.Cell);
+            await _powerUpAnimator.PlayMergeAnimation(items, targetPos);
+
+            foreach (var item in items)
+                item.DestroyItem(DestroyMode.Instant);
+
+            ExecuteSpawn(spawn);
+        }
+        Dictionary<MatchGroup, PowerUpSpawnPlan> MapSpawnsToGroups(List<MatchGroup> groups, List<PowerUpSpawnPlan> spawns)
+        {
+            var map = new Dictionary<MatchGroup, PowerUpSpawnPlan>();
+            foreach (var spawn in spawns)
+            {
+                foreach (var group in groups)
+                {
+                    if (group.Cells.Contains(spawn.Cell))
+                    {
+                        map[group] = spawn;
+                        break;
+                    }
+                }
+            }
+            return map;
         }
 
         void EmitEvents(List<MatchGroup> groups, int cascade)

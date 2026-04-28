@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Game.Configs;
 using R3;
 using UnityEngine;
@@ -18,16 +19,21 @@ namespace Game
             _swapRequester = swapRequester;
             _gridManager = gridManager;
         }
-
+        public RectTransform RectTransform => _view.RectTransform;
         public PlayfieldItemKind Kind { get; private set; }
         public PlayfieldItemColorType? Color { get; private set; }
         public IPowerUpBehaviour PowerUp { get; private set; }
         public Vector2Int OccupiedCell { get; private set; }
+        
+        private Subject<bool> _onDestroyed = new();
+        public Observable<bool> OnDestroyed => _onDestroyed;
 
         public bool IsPowerUp => PowerUp != null;
 
         public void Dispose()
         {
+            _onDestroyed.OnNext(true);
+            _onDestroyed.Dispose();
         }
 
         public void Init(PlayfieldItemConfig config, PlayfieldItemView view, IPowerUpBehaviour powerUp)
@@ -68,14 +74,13 @@ namespace Game
             _view.MoveTo(targetPos, anim);
         }
 
-        public void SetVisibility(bool visible)
-        {
-            _view.SetVisibility(visible);
-        }
+        public void Hide() => _view.Hide();
 
-        public void DestroyItem()
+        public UniTask PlaySpawnAnimation() => _view.PlaySpawnAnimation();
+
+        public void DestroyItem(DestroyMode mode)
         {
-            _view.AnimateDestroy();
+            _view.Destroy(mode);
         }
     }
 }

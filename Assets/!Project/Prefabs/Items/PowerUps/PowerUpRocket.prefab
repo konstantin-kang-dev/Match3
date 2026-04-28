@@ -16,9 +16,13 @@ PrefabInstance:
       propertyPath: m_SortingLayer
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1615755047554555567, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: aa226a806f9ea924092170bc9b3e2458, type: 2}
     - target: {fileID: 2562336379352237832, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Name
-      value: PowerUpRocketVertical
+      value: PowerUpRocket
       objectReference: {fileID: 0}
     - target: {fileID: 5613670052034881416, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: _alternativeSprite
@@ -26,7 +30,11 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 4b3b3aae406076242af77f93cc123e25, type: 3}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.7
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -110,6 +118,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8713765872291728855, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8713765872291728855, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8793658777088033312, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
