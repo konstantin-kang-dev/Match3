@@ -40,5 +40,15 @@ namespace Game
             for (int y = 0; y < Size.y; y++)
                 yield return _cells[x, y];
         }
+
+        // Атомарный обмен Item'ов между двумя Occupied слотами без эмита событий.
+        // Используется только для пользовательского свапа — каскады/падения это не должны триггерить.
+        // Матч-детекцию после свапа вызывает PlayfieldManager явно.
+        public void Swap(Vector2Int a, Vector2Int b)
+        {
+            var slotA = _cells[a.x, a.y];
+            var slotB = _cells[b.x, b.y];
+            slotA.SwapItemSilently(slotB);
+        }
     }
 }

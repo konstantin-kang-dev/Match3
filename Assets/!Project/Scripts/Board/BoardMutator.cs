@@ -14,19 +14,22 @@ namespace Game
         private readonly GridManager _gridManager;
         private readonly IVfxService _vfxService;
         private readonly PowerUpAnimator _animator;
+        private readonly BoardActivityTracker _tracker;
 
         public BoardMutator(
             BoardState board,
             PlayfieldItemsFactory factory,
             GridManager gridManager,
             IVfxService vfxService,
-            PowerUpAnimator animator)
+            PowerUpAnimator animator,
+            BoardActivityTracker tracker)
         {
             _board = board;
             _factory = factory;
             _gridManager = gridManager;
             _vfxService = vfxService;
             _animator = animator;
+            _tracker = tracker;
         }
 
         public async UniTask DestroyCells(
@@ -35,59 +38,71 @@ namespace Game
             DestroyMode mode = DestroyMode.Animated,
             bool playVfx = true)
         {
-            var powerUpsToActivate = new List<(PlayfieldItem item, CellSlot slot)>();
-            var slotsToFinalize = new List<CellSlot>();
-
-            foreach (var cell in cells)
+            using (_tracker.BeginActivity())
             {
-                var slot = _board.Get(cell);
+                var powerUpsToActivate = new List<(PlayfieldItem item, CellSlot slot)>();
+                var slotsToFinalize = new List<CellSlot>();
 
-                // Кто-то уже уничтожает или клетка пуста — пропускаем
-                if (slot.State == CellState.Destroying || slot.State == CellState.Empty) continue;
-
-                var item = slot.Item;
-                if (item == null) continue;
-
-                // Падающая клетка — отменяем tween, чтобы остановить визуальное падение
-                if (slot.State == CellState.Falling)
-                    item.RectTransform.DOKill();
-
-                slot.SetDestroying();
-
-                if (item.IsPowerUp)
+                foreach (var cell in cells)
                 {
-                    powerUpsToActivate.Add((item, slot));
-                }
-                else
-                {
-                    if (playVfx)
+                    var slot = _board.Get(cell);
+
+                    // Кто-то уже уничтожает или клетка пуста — пропускаем
+                    if (slot.State == CellState.Destroying || slot.State == CellState.Empty) continue;
+
+                    var item = slot.Item;
+                    if (item == null) continue;
+
+                    // Падающая клетка — отменяем tween, чтобы остановить визуальное падение
+                    if (slot.State == CellState.Falling)
+                        item.RectTransform.DOKill();
+
+                    slot.SetDestroying();
+
+                    if (item.IsPowerUp)
                     {
-                        var capturedCell = cell;
-                        item.OnDestroyed.Subscribe(_ =>
-                        {
-                            _vfxService.PlayAtCell(PlayfieldVfxType.MatchDestroy, capturedCell);
-                        });
+                        powerUpsToActivate.Add((item, slot));
                     }
+                    else
+                    {
+                        if (playVfx)
+                        {
+                            var capturedCell = cell;
+                            item.OnDestroyed.Subscribe(_ =>
+                            {
+                                _vfxService.PlayAtCell(PlayfieldVfxType.MatchDestroy, capturedCell);
+                            });
+                        }
 
-                    item.DestroyItem(mode);
-                    slotsToFinalize.Add(slot);
+                        item.DestroyItem(mode);
+                        slotsToFinalize.Add(slot);
+                    }
                 }
-            }
 
-            if (mode == DestroyMode.Animated)
-                await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
+                if (mode == DestroyMode.Animated)
+                    await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
 
-            // Освобождаем слоты обычных фишек — это запустит реакцию колонок
-            foreach (var slot in slotsToFinalize)
-                slot.SetEmpty();
+                // Освобождаем слоты обычных фишек — это запустит реакцию колонок
+                foreach (var slot in slotsToFinalize)
+                    slot.SetEmpty();
 
-            // Активируем PowerUp'ы
-            foreach (var (powerUp, slot) in powerUpsToActivate)
-            {
-                var ctx = new ActivationContext(powerUp.OccupiedCell, powerUp);
-                await powerUp.PowerUp.Activate(ctx, context);
-                powerUp.DestroyItem(DestroyMode.Instant);
-                slot.SetEmpty();
+                // Активируем PowerUp'ы. Каждая активация под freeze, чтобы колонки
+                // не запускали новые падения, пока PowerUp работает (Homescapes-поведение).
+                foreach (var (powerUp, slot) in powerUpsToActivate)
+                {
+                    _tracker.Freeze();
+                    try
+                    {
+                        var ctx = new ActivationContext(powerUp.OccupiedCell, powerUp);
+                        await powerUp.PowerUp.Activate(ctx, context);
+                        powerUp.DestroyItem(DestroyMode.Instant);
+                        slot.SetEmpty();
+                    }
+                    finally
+                    {
+                        _tracker.Unfreeze();
+                    }
+                }
             }
         }
 

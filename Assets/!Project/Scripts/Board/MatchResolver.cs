@@ -14,7 +14,8 @@ namespace Game
         private readonly BoardState _board;
         private readonly IBoardContext _boardContext;
         private readonly PowerUpAnimator _powerUpAnimator;
-        
+        private readonly BoardActivityTracker _tracker;
+
         private readonly Subject<MatchResolvedEvent> _onMatchResolved = new();
         public Observable<MatchResolvedEvent> OnMatchResolved => _onMatchResolved.AsObservable();
 
@@ -23,41 +24,47 @@ namespace Game
             GridManager gridManager,
             IBoardContext boardContext,
             PowerUpAnimator powerUpAnimator,
-            BoardState board)
+            BoardState board,
+            BoardActivityTracker tracker)
         {
             _mutator = mutator;
             _gridManager = gridManager;
             _board = board;
-            _boardContext =  boardContext;
+            _boardContext = boardContext;
             _powerUpAnimator = powerUpAnimator;
+            _tracker = tracker;
         }
 
         public async UniTask Resolve(List<MatchGroup> groups, Vector2Int? swapCell, int cascade)
         {
-            EmitEvents(groups, cascade);
-
-            var spawns = ResolveSpawns(groups, swapCell);
-            var spawnsByGroup = MapSpawnsToGroups(groups, spawns);
-
-            var mergeTasks = new List<UniTask>();
-            var cellsForRegularDestroy = new List<Vector2Int>();
-
-            foreach (var group in groups)
+            using (_tracker.BeginActivity())
             {
-                if (spawnsByGroup.TryGetValue(group, out var spawn))
+                EmitEvents(groups, cascade);
+
+                var spawns = ResolveSpawns(groups, swapCell);
+                var spawnsByGroup = MapSpawnsToGroups(groups, spawns);
+
+                var mergeTasks = new List<UniTask>();
+                var cellsForRegularDestroy = new List<Vector2Int>();
+
+                foreach (var group in groups)
                 {
-                    mergeTasks.Add(PlayMergeAndSpawn(group, spawn));
+                    if (spawnsByGroup.TryGetValue(group, out var spawn))
+                    {
+                        mergeTasks.Add(PlayMergeAndSpawn(group, spawn));
+                    }
+                    else
+                    {
+                        cellsForRegularDestroy.AddRange(group.Cells);
+                    }
                 }
-                else
-                {
-                    cellsForRegularDestroy.AddRange(group.Cells);
-                }
+
+                var destroyTask = _mutator.DestroyCells(cellsForRegularDestroy, _boardContext, DestroyMode.Animated, playVfx: true);
+
+                await UniTask.WhenAll(UniTask.WhenAll(mergeTasks), destroyTask);
             }
-
-            var destroyTask = _mutator.DestroyCells(cellsForRegularDestroy, _boardContext, DestroyMode.Animated, playVfx: true);
-
-            await UniTask.WhenAll(UniTask.WhenAll(mergeTasks), destroyTask);
         }
+
         async UniTask PlayMergeAndSpawn(MatchGroup group, PowerUpSpawnPlan spawn)
         {
             var items = new List<PlayfieldItem>();
@@ -78,6 +85,7 @@ namespace Game
 
             ExecuteSpawn(spawn);
         }
+
         Dictionary<MatchGroup, PowerUpSpawnPlan> MapSpawnsToGroups(List<MatchGroup> groups, List<PowerUpSpawnPlan> spawns)
         {
             var map = new Dictionary<MatchGroup, PowerUpSpawnPlan>();

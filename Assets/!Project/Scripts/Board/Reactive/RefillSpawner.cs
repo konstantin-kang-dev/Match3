@@ -3,33 +3,46 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Utils;
+using VContainer.Unity;
 
 namespace Game
 {
-    public class RefillSpawner : IDisposable
+    public class RefillSpawner : IStartable, IDisposable
     {
         readonly BoardState _board;
         readonly PlayfieldItemsFactory _factory;
         readonly GridManager _gridManager;
+        readonly ColumnsCoordinator _coordinator;
+        readonly BoardActivityTracker _tracker;
         readonly CompositeDisposable _disposables = new();
 
         public RefillSpawner(
             BoardState board,
             PlayfieldItemsFactory factory,
             GridManager gridManager,
-            ColumnsCoordinator coordinator)
+            ColumnsCoordinator coordinator,
+            BoardActivityTracker tracker)
         {
             _board = board;
             _factory = factory;
             _gridManager = gridManager;
+            _coordinator = coordinator;
+            _tracker = tracker;
+        }
 
-            coordinator.OnColumnNeedsRefill
+        public void Start()
+        {
+            _coordinator.OnColumnNeedsRefill
                 .Subscribe(SpawnInColumn)
                 .AddTo(_disposables);
         }
 
         void SpawnInColumn(int columnIndex)
         {
+            // Под freeze новые фишки не спавним. После Unfreeze координатор
+            // снова пинает колонки, и при необходимости они эмитят OnNeedsRefill заново.
+            if (_tracker.IsFrozen) return;
+
             // Находим верхнюю Empty клетку
             var topEmpty = FindTopEmpty(columnIndex);
             if (topEmpty == null) return;

@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Game
 {
-    public class MatchScanner : IDisposable
+    public class MatchScanner : IStartable, IDisposable
     {
         readonly BoardState _board;
         readonly MatchDetector _detector;
@@ -18,8 +19,11 @@ namespace Game
             _board = board;
             _detector = detector;
             _resolver = resolver;
+        }
 
-            foreach (var slot in board.AllCells())
+        public void Start()
+        {
+            foreach (var slot in _board.AllCells())
             {
                 slot.OnStateChanged
                     .Subscribe(OnSlotStateChanged)

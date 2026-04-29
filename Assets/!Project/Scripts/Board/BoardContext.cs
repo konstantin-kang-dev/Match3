@@ -7,11 +7,11 @@ namespace Game
 {
     public class BoardContext : IBoardContext
     {
-        private readonly IBoard _board;
+        private readonly BoardState _board;
         private readonly BoardMutator _mutator;
         private readonly GridManager _gridManager;
 
-        public BoardContext(IBoard board, BoardMutator mutator, GridManager gridManager)
+        public BoardContext(BoardState board, BoardMutator mutator, GridManager gridManager)
         {
             _board = board;
             _mutator = mutator;
@@ -25,7 +25,7 @@ namespace Game
 
         public UniTask DestroyCells(IEnumerable<Vector2Int> cells, DestroyMode mode = DestroyMode.Animated, bool playVfx = true)
             => _mutator.DestroyCells(cells, this, mode, playVfx);
-        
+
         public IEnumerable<Vector2Int> GetCellsInRadius(Vector2Int center, int radius)
         {
             for (int dx = -radius; dx <= radius; dx++)
@@ -37,43 +37,41 @@ namespace Game
                         yield return cell;
                 }
             }
-
         }
+
         public Vector2Int? FindRandomColoredCell()
         {
             var coloredCells = new List<Vector2Int>();
-            for (int x = 0; x < _board.Size.x; x++)
-            for (int y = 0; y < _board.Size.y; y++)
+            foreach (var slot in _board.AllCells())
             {
-                var cell = new Vector2Int(x, y);
-                var item = _board.Get(cell);
+                if (!IsTargetable(slot)) continue;
+                var item = slot.Item;
                 if (item != null && !item.IsPowerUp)
-                    coloredCells.Add(cell);
+                    coloredCells.Add(slot.Position);
             }
 
             if (coloredCells.Count == 0) return null;
             return coloredCells[Random.Range(0, coloredCells.Count)];
         }
-        
+
         public IEnumerable<Vector2Int> GetCellsByColor(PlayfieldItemColorType color)
         {
-            for (int x = 0; x < _board.Size.x; x++)
-            for (int y = 0; y < _board.Size.y; y++)
+            foreach (var slot in _board.AllCells())
             {
-                var cell = new Vector2Int(x, y);
-                var item = _board.Get(cell);
+                if (!IsTargetable(slot)) continue;
+                var item = slot.Item;
                 if (item != null && item.Color == color)
-                    yield return cell;
+                    yield return slot.Position;
             }
         }
-        
+
         public PlayfieldItemColorType? GetDominantColor()
         {
             var counts = new Dictionary<PlayfieldItemColorType, int>();
-            for (int x = 0; x < _board.Size.x; x++)
-            for (int y = 0; y < _board.Size.y; y++)
+            foreach (var slot in _board.AllCells())
             {
-                var item = _board.Get(new Vector2Int(x, y));
+                if (!IsTargetable(slot)) continue;
+                var item = slot.Item;
                 if (item == null || !item.Color.HasValue) continue;
 
                 var c = item.Color.Value;
@@ -84,7 +82,12 @@ namespace Game
             if (counts.Count == 0) return null;
             return counts.OrderByDescending(kvp => kvp.Value).First().Key;
         }
-        
+
         public Vector2 GetWorldPosition(Vector2Int cell) => _gridManager.GetPositionForCell(cell);
+
+        // Клетка является валидной целью для PowerUp'а, если в ней реально стоит/летит фишка,
+        // и она не находится в процессе уничтожения. Empty / Destroying — невалидны.
+        static bool IsTargetable(CellSlot slot)
+            => slot.State == CellState.Occupied || slot.State == CellState.Falling;
     }
 }

@@ -3,31 +3,35 @@ using DG.Tweening;
 using R3;
 using System;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Game
 {
-    public class FallAnimator : IDisposable
+    public class FallAnimator : IStartable, IDisposable
     {
         readonly BoardState _board;
         readonly GridManager _gridManager;
+        readonly BoardActivityTracker _tracker;
         readonly CompositeDisposable _disposables = new();
 
-        public FallAnimator(BoardState board, GridManager gridManager)
+        public FallAnimator(
+            BoardState board,
+            GridManager gridManager,
+            BoardActivityTracker tracker)
         {
             _board = board;
             _gridManager = gridManager;
+            _tracker = tracker;
+        }
 
-            foreach (var slot in board.AllCells())
+        public void Start()
+        {
+            foreach (var slot in _board.AllCells())
             {
                 slot.OnFallStarted
                     .Subscribe(OnFallStarted)
                     .AddTo(_disposables);
             }
-        }
-
-        public void Dispose()
-        {
-            
         }
 
         void OnFallStarted(FallStartedEvent evt)
@@ -37,22 +41,30 @@ namespace Game
 
         async UniTask AnimateFall(FallStartedEvent evt)
         {
-            var item = evt.Item;
-            var rt = item.RectTransform;
-            Vector2 targetPos = _gridManager.GetPositionForCell(evt.ToCell);
+            using (_tracker.BeginActivity())
+            {
+                var item = evt.Item;
+                var rt = item.RectTransform;
+                Vector2 targetPos = _gridManager.GetPositionForCell(evt.ToCell);
 
-            float distance = Vector2.Distance(rt.anchoredPosition, targetPos);
-            float duration = distance / 2200f;
+                float distance = Vector2.Distance(rt.anchoredPosition, targetPos);
+                float duration = distance / 2200f;
 
-            await rt.DOAnchorPos(targetPos, duration)
-                .SetEase(Ease.InQuad)
-                .AsyncWaitForCompletion()
-                .AsUniTask();
+                await rt.DOAnchorPos(targetPos, duration)
+                    .SetEase(Ease.InQuad)
+                    .AsyncWaitForCompletion()
+                    .AsUniTask();
 
-            // После приземления — переводим в Occupied
-            var targetSlot = _board.Get(evt.ToCell);
-            item.OccupyCell(evt.ToCell);
-            targetSlot.SetOccupied(item);
+                // После приземления — переводим в Occupied
+                var targetSlot = _board.Get(evt.ToCell);
+                item.OccupyCell(evt.ToCell);
+                targetSlot.SetOccupied(item);
+            }
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
         }
     }
 }

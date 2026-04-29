@@ -44,6 +44,16 @@ namespace Game
             ChangeState(CellState.Empty);
         }
 
+        // Меняет Item с другим слотом без эмита событий состояния.
+        // Используется только BoardState.Swap для пользовательского свапа.
+        // Оба слота должны быть Occupied — иначе свап невалиден.
+        internal void SwapItemSilently(CellSlot other)
+        {
+            var tmp = Item;
+            Item = other.Item;
+            other.Item = tmp;
+        }
+
         void ChangeState(CellState newState)
         {
             if (State == newState) return;

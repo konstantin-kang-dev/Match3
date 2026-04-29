@@ -9,15 +9,17 @@ namespace Game
     {
         readonly int _columnIndex;
         readonly List<CellSlot> _slots;
+        readonly BoardActivityTracker _tracker;
         readonly CompositeDisposable _disposables = new();
 
         readonly Subject<int> _onNeedsRefill = new();
         public Observable<int> OnNeedsRefill => _onNeedsRefill.AsObservable();
 
-        public ColumnSimulator(int columnIndex, List<CellSlot> slots)
+        public ColumnSimulator(int columnIndex, List<CellSlot> slots, BoardActivityTracker tracker)
         {
             _columnIndex = columnIndex;
             _slots = slots;
+            _tracker = tracker;
 
             // Подписываемся на изменения каждого слота своей колонки
             foreach (var slot in _slots)
@@ -33,6 +35,19 @@ namespace Game
             // Реагируем только на освобождение клетки
             if (changedSlot.State != CellState.Empty) return;
 
+            // Доска заморожена — новые падения не запускаем.
+            // Существующие Falling доедут до своих ToCell естественно.
+            // На Unfreeze координатор вызовет ResumeIfNeeded и колонка перепроверится.
+            if (_tracker.IsFrozen) return;
+
+            TryStartFall();
+        }
+
+        // Принудительно перепроверить колонку. Вызывается координатором после Unfreeze,
+        // когда Empty-события случились под freeze и были проигнорированы.
+        public void ResumeIfNeeded()
+        {
+            if (_tracker.IsFrozen) return;
             TryStartFall();
         }
 
