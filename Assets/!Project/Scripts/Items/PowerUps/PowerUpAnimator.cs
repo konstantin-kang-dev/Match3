@@ -109,12 +109,12 @@ namespace Game
             float targetAngle = angle - 90f;
 
             seq.Append(rt.DOScale(new Vector3(0.9f, 1.2f, 1f), 0.1f));
-            seq.Append(rt.DOAnchorPosY(startPos.y + 30f, 0.15f).SetEase(Ease.OutCubic));
+            seq.Join(rt.DOAnchorPosY(startPos.y + 30f, 0.15f).SetEase(Ease.OutCubic));
 
-            seq.Append(rt.DOLocalRotate(new Vector3(0, 0, targetAngle), 0.3f).SetEase(Ease.OutQuad));
-            seq.Join(rt.DOScale(Vector3.one, 0.2f));
+            seq.Append(rt.DOLocalRotate(new Vector3(0, 0, targetAngle), 0.15f).SetEase(Ease.OutQuad));
+            seq.Join(rt.DOScale(Vector3.one, 0.15f));
             
-            seq.Append(rt.DOAnchorPos(targetPos, 0.6f).SetEase(Ease.InSine));
+            seq.Append(rt.DOAnchorPos(targetPos, 0.3f).SetEase(Ease.InSine));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }

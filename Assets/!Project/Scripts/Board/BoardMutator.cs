@@ -40,20 +40,30 @@ namespace Game
         {
             using (_tracker.BeginActivity())
             {
+                var cellsList = new List<Vector2Int>();
+                foreach (var c in cells) cellsList.Add(c);
+
+                foreach (var cell in cellsList)
+                {
+                    var s = _board.Get(cell);
+                    var itemHash = s.Item == null ? "null" : s.Item.GetHashCode().ToString();
+                    var disposed = s.Item != null && s.Item.IsDisposed;
+                }
+
                 var powerUpsToActivate = new List<(PlayfieldItem item, CellSlot slot)>();
                 var slotsToFinalize = new List<CellSlot>();
 
-                foreach (var cell in cells)
+                foreach (var cell in cellsList)
                 {
                     var slot = _board.Get(cell);
 
-                    // Кто-то уже уничтожает или клетка пуста — пропускаем
                     if (slot.State == CellState.Destroying || slot.State == CellState.Empty) continue;
 
                     var item = slot.Item;
                     if (item == null) continue;
-
-                    // Падающая клетка — отменяем tween, чтобы остановить визуальное падение
+                    
+                    if (item.IsActivating) continue;
+                    
                     if (slot.State == CellState.Falling)
                         item.RectTransform.DOKill();
 
@@ -82,14 +92,13 @@ namespace Game
                 if (mode == DestroyMode.Animated)
                     await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
 
-                // Освобождаем слоты обычных фишек — это запустит реакцию колонок
                 foreach (var slot in slotsToFinalize)
                     slot.SetEmpty();
 
-                // Активируем PowerUp'ы. Каждая активация под freeze, чтобы колонки
-                // не запускали новые падения, пока PowerUp работает (Homescapes-поведение).
                 foreach (var (powerUp, slot) in powerUpsToActivate)
                 {
+                    Debug.Log($"[BoardMutator] PowerUp {powerUp.Kind} isActivating = {powerUp.IsActivating}");
+                    powerUp.SetActivating(true);
                     _tracker.Freeze();
                     try
                     {
@@ -100,6 +109,7 @@ namespace Game
                     }
                     finally
                     {
+                        powerUp.SetActivating(false);
                         _tracker.Unfreeze();
                     }
                 }
@@ -154,7 +164,7 @@ namespace Game
             var existing = slot.Item;
             slot.SetDestroying();
             existing.DestroyItem(DestroyMode.Instant);
-            slot.SetEmpty();
+            slot.ClearItem();
         }
 
         void PlaceAt(Vector2Int cell, PlayfieldItem item)

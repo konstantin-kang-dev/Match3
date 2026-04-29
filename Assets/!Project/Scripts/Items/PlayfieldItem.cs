@@ -9,31 +9,44 @@ namespace Game
     public class PlayfieldItem : IDisposable
     {
         private readonly GridManager _gridManager;
-
         private readonly ISwapRequester _swapRequester;
 
         private PlayfieldItemView _view;
 
+        private readonly CompositeDisposable _disposables = new();
+        private readonly Subject<bool> _onDestroyed = new();
+        public Observable<bool> OnDestroyed => _onDestroyed.AsObservable();
+
+        private bool _disposed;
+        public bool IsDisposed => _disposed;
+        public bool IsActivating { get; private set; }
+
+        internal void SetActivating(bool value)
+        {
+            IsActivating = value;
+        }
         public PlayfieldItem(ISwapRequester swapRequester, GridManager gridManager)
         {
             _swapRequester = swapRequester;
             _gridManager = gridManager;
         }
+
         public RectTransform RectTransform => _view.RectTransform;
         public PlayfieldItemKind Kind { get; private set; }
         public PlayfieldItemColorType? Color { get; private set; }
         public IPowerUpBehaviour PowerUp { get; private set; }
         public Vector2Int OccupiedCell { get; private set; }
-        
-        private Subject<bool> _onDestroyed = new();
-        public Observable<bool> OnDestroyed => _onDestroyed;
 
         public bool IsPowerUp => PowerUp != null;
 
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
+
             _onDestroyed.OnNext(true);
             _onDestroyed.Dispose();
+            _disposables.Dispose();
         }
 
         public void Init(PlayfieldItemConfig config, PlayfieldItemView view, IPowerUpBehaviour powerUp)
@@ -54,9 +67,14 @@ namespace Game
                     _view.SetAlternativeSprite(true);
                 }
             }
-            
-            _view.OnSwapRequest.Subscribe(HandleSwapRequest);
-            _view.OnDestroyed.Subscribe(_ => Dispose());
+
+            _view.OnSwapRequest
+                .Subscribe(HandleSwapRequest)
+                .AddTo(_disposables);
+
+            _view.OnDestroyed
+                .Subscribe(_ => Dispose())
+                .AddTo(_disposables);
         }
 
         private void HandleSwapRequest(Vector2Int direction)

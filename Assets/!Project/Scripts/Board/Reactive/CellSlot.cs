@@ -26,7 +26,7 @@ namespace Game
             ChangeState(CellState.Falling);
             _onFallStarted.OnNext(new FallStartedEvent(item, sourceCell, Position));
         }
-
+        
         public void SetOccupied(PlayfieldItem item)
         {
             Item = item;
@@ -44,9 +44,11 @@ namespace Game
             ChangeState(CellState.Empty);
         }
 
-        // Меняет Item с другим слотом без эмита событий состояния.
-        // Используется только BoardState.Swap для пользовательского свапа.
-        // Оба слота должны быть Occupied — иначе свап невалиден.
+        internal void ClearItem()
+        {
+            Item = null;
+        }
+
         internal void SwapItemSilently(CellSlot other)
         {
             var tmp = Item;

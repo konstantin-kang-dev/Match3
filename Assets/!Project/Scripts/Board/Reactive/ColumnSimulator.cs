@@ -1,6 +1,7 @@
 ﻿using R3;
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Game
@@ -12,8 +13,21 @@ namespace Game
         readonly BoardActivityTracker _tracker;
         readonly CompositeDisposable _disposables = new();
 
-        readonly Subject<int> _onNeedsRefill = new();
-        public Observable<int> OnNeedsRefill => _onNeedsRefill.AsObservable();
+        readonly Subject<(int columnIndex, int cellsOffset)> _onNeedsRefill = new();
+        public Observable<(int columnIndex, int cellsOffset)> OnNeedsRefill => _onNeedsRefill.AsObservable();
+
+        // Re-entry guard: TryStartFall вызывает мутации (SetEmpty/SetFalling),
+        // которые синхронно эмитят OnStateChanged → OnSlotChanged → TryStartFall.
+        // Без guard'а получим вложенные циклы, работающие на одном и том же
+        // состоянии колонки, что приводит к двойным записям в один слот
+        // (наслоение фишек) и потере Item'ов.
+        //
+        // Паттерн: пока идёт внешний цикл, вложенные триггеры только взводят
+        // _pending. После внешнего — крутим повторы, пока pending не сбросится.
+        // Гарантия: каждое изменение либо обработано в текущем проходе,
+        // либо вызовет немедленный повтор.
+        bool _running;
+        bool _pending;
 
         public ColumnSimulator(int columnIndex, List<CellSlot> slots, BoardActivityTracker tracker)
         {
@@ -21,7 +35,6 @@ namespace Game
             _slots = slots;
             _tracker = tracker;
 
-            // Подписываемся на изменения каждого слота своей колонки
             foreach (var slot in _slots)
             {
                 slot.OnStateChanged
@@ -30,55 +43,66 @@ namespace Game
             }
         }
 
-        void OnSlotChanged(CellSlot changedSlot)
+        void OnSlotChanged(CellSlot _)
         {
-            // Реагируем только на освобождение клетки
-            if (changedSlot.State != CellState.Empty) return;
-
-            // Доска заморожена — новые падения не запускаем.
-            // Существующие Falling доедут до своих ToCell естественно.
-            // На Unfreeze координатор вызовет ResumeIfNeeded и колонка перепроверится.
             if (_tracker.IsFrozen) return;
-
-            TryStartFall();
+            RunOrSchedule();
         }
 
-        // Принудительно перепроверить колонку. Вызывается координатором после Unfreeze,
-        // когда Empty-события случились под freeze и были проигнорированы.
         public void ResumeIfNeeded()
         {
             if (_tracker.IsFrozen) return;
-            TryStartFall();
+            RunOrSchedule();
+        }
+
+        void RunOrSchedule()
+        {
+            if (_running)
+            {
+                _pending = true;
+                return;
+            }
+
+            _running = true;
+            try
+            {
+                do
+                {
+                    _pending = false;
+                    TryStartFall();
+                } while (_pending);
+            }
+            finally
+            {
+                _running = false;
+            }
         }
 
         void TryStartFall()
         {
-            // Идём снизу вверх. Для каждой Empty клетки — ищем выше первую Occupied и спускаем её.
             for (int y = 0; y < _slots.Count; y++)
             {
                 var slot = _slots[y];
                 if (slot.State != CellState.Empty) continue;
 
-                // Ищем выше первую Occupied клетку
-                int sourceY = FindNearestOccupiedAbove(y);
+                int sourceY = FindNearestValidCellAbove(y);
                 if (sourceY == -1)
                 {
-                    // Нечем заполнить из колонки — нужен спавн сверху
                     if (NeedsSpawnAt(y))
-                        _onNeedsRefill.OnNext(_columnIndex);
+                    {
+                        _onNeedsRefill.OnNext((_columnIndex, 0)); //TODO: Надо сделать, чтобы новые фишки падали очередно друг за другом, сейчас они спавнятся в кучке и падают одновременно в свои места
+                    }
                     continue;
                 }
-
-                // Запускаем падение из sourceY → y
                 StartFall(sourceY, y);
             }
         }
 
-        int FindNearestOccupiedAbove(int fromY)
+        int FindNearestValidCellAbove(int fromY)
         {
             for (int y = fromY + 1; y < _slots.Count; y++)
             {
-                if (_slots[y].State == CellState.Occupied)
+                if (_slots[y].State == CellState.Occupied ||  _slots[y].State == CellState.Falling)
                     return y;
             }
             return -1;
@@ -86,7 +110,6 @@ namespace Game
 
         bool NeedsSpawnAt(int y)
         {
-            // Спавн нужен, если выше этой клетки нет Occupied И нет Falling.
             for (int upper = y + 1; upper < _slots.Count; upper++)
             {
                 if (_slots[upper].State == CellState.Occupied) return false;
@@ -100,7 +123,6 @@ namespace Game
             var sourceSlot = _slots[fromY];
             var targetSlot = _slots[toY];
             var item = sourceSlot.Item;
-
             sourceSlot.SetEmpty();
             targetSlot.SetFalling(item, new Vector2Int(_columnIndex, fromY));
         }

@@ -68,14 +68,14 @@ namespace Game
         async UniTask PlayMergeAndSpawn(MatchGroup group, PowerUpSpawnPlan spawn)
         {
             var items = new List<PlayfieldItem>();
+            var slots = new List<CellSlot>();
             foreach (var cell in group.Cells)
             {
                 var slot = _board.Get(cell);
                 if (slot.Item != null) items.Add(slot.Item);
+                slots.Add(slot);
+                slot.SetDestroying();
             }
-
-            foreach (var cell in group.Cells)
-                _board.Get(cell).SetEmpty();
 
             Vector2 targetPos = _gridManager.GetPositionForCell(spawn.Cell);
             await _powerUpAnimator.PlayMergeAnimation(items, targetPos);
@@ -83,7 +83,23 @@ namespace Game
             foreach (var item in items)
                 item.DestroyItem(DestroyMode.Instant);
 
+            // Item'ы уничтожены — синхронизируем слоты, чтобы не было висячих ссылок
+            // на disposed-объекты. Без событий: слоты остаются Destroying.
+            foreach (var slot in slots)
+                slot.ClearItem();
+
+            // spawn-клетка переходит Destroying -> Occupied(PowerUp) одним шагом,
+            // без промежуточного Empty. Симулятор окна не видит.
             ExecuteSpawn(spawn);
+
+            // Остальные клетки группы освобождаем ПОСЛЕ ExecuteSpawn. Если бы это шло до,
+            // ColumnSimulator увидел бы Empty ниже spawn-клетки и попытался уронить
+            // только что заспавненный PowerUp.
+            foreach (var slot in slots)
+            {
+                if (slot.Position == spawn.Cell) continue;
+                slot.SetEmpty();
+            }
         }
 
         Dictionary<MatchGroup, PowerUpSpawnPlan> MapSpawnsToGroups(List<MatchGroup> groups, List<PowerUpSpawnPlan> spawns)

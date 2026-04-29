@@ -12,8 +12,8 @@ namespace Game
         readonly List<ColumnSimulator> _columns = new();
         readonly CompositeDisposable _disposables = new();
 
-        readonly Subject<int> _onColumnNeedsRefill = new();
-        public Observable<int> OnColumnNeedsRefill => _onColumnNeedsRefill.AsObservable();
+        readonly Subject<(int columnIndex, int cellsOffset)> _onColumnNeedsRefill = new();
+        public Observable<(int columnIndex, int cellsOffset)> OnColumnNeedsRefill => _onColumnNeedsRefill.AsObservable();
 
         public ColumnsCoordinator(BoardState board, BoardActivityTracker tracker)
         {

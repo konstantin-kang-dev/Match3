@@ -115,12 +115,13 @@ namespace Game
             var targetItem = slotFrom.Item == powerUp ? _board.Get(to).Item : slotFrom.Item;
             var swappedColor = targetItem?.Color;
 
+            if(powerUp.IsActivating) return;
             SwapItems(from, to);
             await UniTask.WaitForSeconds(0.15f);
 
-            // PowerUp оказался в позиции противоположного слота после свапа.
             Vector2Int activationCell = powerUp.OccupiedCell;
-
+            
+            powerUp.SetActivating(true);
             _tracker.Freeze();
             try
             {
@@ -134,6 +135,7 @@ namespace Game
             }
             finally
             {
+                powerUp.SetActivating(false);
                 _tracker.Unfreeze();
             }
         }

@@ -37,28 +37,34 @@ namespace Game
                 .AddTo(_disposables);
         }
 
-        void SpawnInColumn(int columnIndex)
+        void SpawnInColumn((int columnIndex, int cellsOffset) kvp)
         {
-            // Под freeze новые фишки не спавним. После Unfreeze координатор
-            // снова пинает колонки, и при необходимости они эмитят OnNeedsRefill заново.
-            if (_tracker.IsFrozen) return;
-
-            // Находим верхнюю Empty клетку
+            int columnIndex = kvp.columnIndex;
+            int cellsOffset = kvp.cellsOffset;
+            
+            if (_tracker.IsFrozen) 
+            {
+                return;
+            }
             var topEmpty = FindTopEmpty(columnIndex);
-            if (topEmpty == null) return;
+            if (topEmpty == null) 
+            {
+                return;
+            }
 
             // Спавним фишку
             var color = GetTypeWithoutMatch(topEmpty.Position);
             var item = _factory.SpawnColored(color, _gridManager.PlayfieldItemsContainer);
 
             // Стартовая позиция — над доской
-            Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y);
+            Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y + cellsOffset);
             Vector2 startWorldPos = _gridManager.GetPositionForCell(virtualSourceCell);
             item.MoveTo(startWorldPos, MoveAnimationType.None);
             item.PlaySpawnAnimation();
 
             // Запускаем падение через слот
             topEmpty.SetFalling(item, virtualSourceCell);
+            Debug.Log($"[RefillSpawner] Spawned cell in y={virtualSourceCell}");
         }
 
         CellSlot FindTopEmpty(int columnIndex)
