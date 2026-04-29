@@ -13,8 +13,8 @@ namespace Game
         readonly BoardActivityTracker _tracker;
         readonly CompositeDisposable _disposables = new();
 
-        readonly Subject<(int columnIndex, int cellsOffset)> _onNeedsRefill = new();
-        public Observable<(int columnIndex, int cellsOffset)> OnNeedsRefill => _onNeedsRefill.AsObservable();
+        readonly Subject<int> _onNeedsRefill = new();
+        public Observable<int> OnNeedsRefill => _onNeedsRefill.AsObservable();
 
         // Re-entry guard: TryStartFall вызывает мутации (SetEmpty/SetFalling),
         // которые синхронно эмитят OnStateChanged → OnSlotChanged → TryStartFall.
@@ -90,7 +90,7 @@ namespace Game
                 {
                     if (NeedsSpawnAt(y))
                     {
-                        _onNeedsRefill.OnNext((_columnIndex, 0)); //TODO: Надо сделать, чтобы новые фишки падали очередно друг за другом, сейчас они спавнятся в кучке и падают одновременно в свои места
+                        _onNeedsRefill.OnNext(_columnIndex); //TODO: Надо сделать, чтобы новые фишки падали очередно друг за другом, сейчас они спавнятся в кучке и падают одновременно в свои места
                     }
                     continue;
                 }
@@ -102,7 +102,7 @@ namespace Game
         {
             for (int y = fromY + 1; y < _slots.Count; y++)
             {
-                if (_slots[y].State == CellState.Occupied ||  _slots[y].State == CellState.Falling)
+                if (_slots[y].State == CellState.Occupied || _slots[y].State == CellState.Falling)
                     return y;
             }
             return -1;
@@ -112,8 +112,10 @@ namespace Game
         {
             for (int upper = y + 1; upper < _slots.Count; upper++)
             {
-                if (_slots[upper].State == CellState.Occupied) return false;
-                if (_slots[upper].State == CellState.Falling) return false;
+                var s = _slots[upper];
+                if (s.State == CellState.Occupied) return false;
+
+                if (s.State == CellState.Falling && s.Item != null && s.Item.IsRefillFalling) return false;
             }
             return true;
         }
@@ -123,6 +125,9 @@ namespace Game
             var sourceSlot = _slots[fromY];
             var targetSlot = _slots[toY];
             var item = sourceSlot.Item;
+            if (item != null && item.IsRefillFalling)
+                item.MarkRefillFalling(false);
+            
             sourceSlot.SetEmpty();
             targetSlot.SetFalling(item, new Vector2Int(_columnIndex, fromY));
         }

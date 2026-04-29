@@ -81,6 +81,7 @@ namespace Game
 
                 item.OccupyCell(evt.ToCell);
                 targetSlot.SetOccupied(item);
+                item.MarkRefillFalling(false);
             }
         }
 

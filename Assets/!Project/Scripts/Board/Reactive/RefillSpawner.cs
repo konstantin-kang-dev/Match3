@@ -37,11 +37,8 @@ namespace Game
                 .AddTo(_disposables);
         }
 
-        void SpawnInColumn((int columnIndex, int cellsOffset) kvp)
+        void SpawnInColumn(int columnIndex)
         {
-            int columnIndex = kvp.columnIndex;
-            int cellsOffset = kvp.cellsOffset;
-            
             if (_tracker.IsFrozen) 
             {
                 return;
@@ -55,9 +52,10 @@ namespace Game
             // Спавним фишку
             var color = GetTypeWithoutMatch(topEmpty.Position);
             var item = _factory.SpawnColored(color, _gridManager.PlayfieldItemsContainer);
-
+            item.MarkRefillFalling(true);
+            
             // Стартовая позиция — над доской
-            Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y + cellsOffset);
+            Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y);
             Vector2 startWorldPos = _gridManager.GetPositionForCell(virtualSourceCell);
             item.MoveTo(startWorldPos, MoveAnimationType.None);
             item.PlaySpawnAnimation();
