@@ -4,6 +4,10 @@
     {
         
         MatchDestroy = 0,
+        MatchRedDestroy = 1,
+        MatchGreenDestroy = 2,
+        MatchYellowDestroy = 3,
+        MatchPinkDestroy = 4,
         
         
         RocketSpawn = 100,
@@ -16,10 +20,10 @@
         BombActivate = 201,
 
         
-        PlaneSpawn = 300,
-        PlaneTakeoff = 301,
-        PlaneFly = 302,
-        PlaneImpact = 303,
+        BalloonSpawn = 300,
+        BalloonTakeoff = 301,
+        BalloonFly = 302,
+        BalloonImpact = 303,
 
         
         DiscoSpawn = 400,

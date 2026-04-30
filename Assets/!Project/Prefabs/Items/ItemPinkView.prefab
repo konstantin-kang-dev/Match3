@@ -34,19 +34,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -24.4
+      value: -7.2
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_ConstrainProportionsScale

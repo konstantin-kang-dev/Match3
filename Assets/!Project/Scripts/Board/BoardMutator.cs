@@ -80,7 +80,8 @@ namespace Game
                             var capturedCell = cell;
                             item.OnDestroyed.Subscribe(_ =>
                             {
-                                _vfxService.PlayAtCell(PlayfieldVfxType.MatchDestroy, capturedCell);
+                                PlayfieldVfxType vfxType = ProjectUtils.ConvertColorTypeToVfxType(item.Color.Value);
+                                _vfxService.PlayAtCell(vfxType, capturedCell);
                             });
                         }
 
@@ -90,7 +91,13 @@ namespace Game
                 }
 
                 if (mode == DestroyMode.Animated)
+                {
                     await UniTask.WaitForSeconds(ProjectConstants.ITEM_DESTROY_ANIM_DURATION);
+                }
+                else
+                {
+                    await UniTask.WaitForSeconds(ProjectConstants.ITEM_FALL_DURATION);
+                }
 
                 foreach (var slot in slotsToFinalize)
                     slot.SetEmpty();

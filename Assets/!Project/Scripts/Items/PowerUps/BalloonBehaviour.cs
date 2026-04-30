@@ -55,6 +55,7 @@ namespace Game
                 Vector2Int target = context.GetRandomCell();
                 await _animator.PlayBalloonActivation(balloon, target);
 
+                _vfxService.PlayAtCell(PlayfieldVfxType.BalloonImpact, target);
                 await context.DestroyCells(GetRingCells(target, 1, context), DestroyMode.Instant);
                 
                 balloon.DestroyItem(DestroyMode.Instant);

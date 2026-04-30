@@ -24,6 +24,15 @@ namespace Game.Utils
             return delta.y > 0 ? Vector2Int.up : Vector2Int.down;
         }
 
+        public static PlayfieldVfxType ConvertColorTypeToVfxType(PlayfieldItemColorType colorType) => colorType switch
+        {
+            PlayfieldItemColorType.ItemRed => PlayfieldVfxType.MatchRedDestroy,
+            PlayfieldItemColorType.ItemGreen => PlayfieldVfxType.MatchGreenDestroy,
+            PlayfieldItemColorType.ItemYellow => PlayfieldVfxType.MatchYellowDestroy,
+            PlayfieldItemColorType.ItemPink => PlayfieldVfxType.MatchPinkDestroy,
+            _ => PlayfieldVfxType.MatchDestroy
+        };
+        
         public static PlayfieldItemColorType GetRandomPlayfieldItemColorType()
         {
             var values = Enum.GetValues(typeof(PlayfieldItemColorType));

@@ -51,7 +51,7 @@ namespace Game
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
 
-            seq.Append(rt.DOScale(new Vector3(0f, 0f, 0f), 0.05f).SetEase(Ease.InBack));
+            seq.Append(rt.DOScale(new Vector3(0f, 0f, 0f), 0.01f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
@@ -75,7 +75,7 @@ namespace Game
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
 
-            seq.Append(rt.DOScale(new Vector3(0f, 0f, 1f), 0.075f).SetEase(Ease.InBack));
+            seq.Append(rt.DOScale(new Vector3(0f, 0f, 1f), 0.01f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
@@ -84,12 +84,10 @@ namespace Game
         {
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
-
+            
             seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.15f).SetEase(Ease.OutBack));
-            seq.Join(rt.DORotate(new Vector3(0f, 0f, 15f), 0.15f).SetEase(Ease.OutBack));
             
             seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.15f).SetEase(Ease.OutBack));
-            seq.Join(rt.DORotate(new Vector3(0f, 0f, 0f), 0.15f).SetEase(Ease.OutBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
