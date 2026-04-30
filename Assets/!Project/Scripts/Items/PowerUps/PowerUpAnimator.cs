@@ -51,8 +51,7 @@ namespace Game
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
 
-            seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.12f).SetEase(Ease.OutBack));
-            seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.12f).SetEase(Ease.OutBack));
+            seq.Append(rt.DOScale(new Vector3(0f, 0f, 0f), 0.05f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
@@ -76,13 +75,12 @@ namespace Game
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
 
-            seq.Append(rt.DOScale(new Vector3(1.4f, 1.4f, 1f), 0.15f).SetEase(Ease.OutQuad));
-            seq.Append(rt.DOScale(new Vector3(1.2f, 0.8f, 1f), 0.05f));
+            seq.Append(rt.DOScale(new Vector3(0f, 0f, 1f), 0.075f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
         
-        public UniTask PlayPlaneSpawn(PlayfieldItem item)
+        public UniTask PlayBalloonSpawn(PlayfieldItem item)
         {
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
@@ -96,25 +94,21 @@ namespace Game
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
 
-        public UniTask PlayPlaneActivation(PlayfieldItem item, Vector2Int targetCell)
+        public UniTask PlayBalloonActivation(PlayfieldItem item, Vector2Int targetCell)
         {
             var rt = item.RectTransform;
             var seq = DOTween.Sequence();
             Vector2 targetPos = _gridManager.GetPositionForCell(targetCell);
             Vector2 startPos = rt.anchoredPosition;
 
-            Vector2 direction = targetPos - startPos;
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            seq.Append(rt.DOAnchorPos(targetPos, 0.6f).SetEase(Ease.InOutQuad));
 
-            float targetAngle = angle - 90f;
-
-            seq.Append(rt.DOScale(new Vector3(0.9f, 1.2f, 1f), 0.1f));
-            seq.Join(rt.DOAnchorPosY(startPos.y + 30f, 0.15f).SetEase(Ease.OutCubic));
-
-            seq.Append(rt.DOLocalRotate(new Vector3(0, 0, targetAngle), 0.15f).SetEase(Ease.OutQuad));
-            seq.Join(rt.DOScale(Vector3.one, 0.15f));
-            
-            seq.Append(rt.DOAnchorPos(targetPos, 0.3f).SetEase(Ease.InSine));
+            seq.Join(DOTween.To(
+                () => 0f,
+                t => rt.localScale = Vector3.LerpUnclamped(Vector3.one, new Vector3(2f, 2f, 2f), Mathf.Sin(t * Mathf.PI)),
+                1f,
+                0.6f
+            ).SetEase(Ease.Linear));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }

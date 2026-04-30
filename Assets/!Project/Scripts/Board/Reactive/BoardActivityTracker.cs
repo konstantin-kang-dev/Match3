@@ -3,15 +3,15 @@ using System;
 
 namespace Game
 {
-    /// <summary>
-    /// Отслеживает занятость доски и состояние заморозки.
-    /// 
-    /// Активность — любая асинхронная операция, которая модифицирует доску:
-    /// падение фишки, активация PowerUp'а, цикл MatchResolver.Resolve.
-    /// Доска IsIdle = true когда все операции завершены.
-    /// 
-    /// Freeze — отдельный флаг для остановки колонок при активации PowerUp'ов
-    /// (Homescapes-поведение: Disco замораживает доску, существующие падения
+    
+    
+    
+    
+    
+    
+    
+    
+    
     /// доезжают до следующей клетки, новые не запускаются).
     /// 
     /// При Unfreeze эмитится OnUnfrozen — это сигнал для ColumnsCoordinator
@@ -21,7 +21,7 @@ namespace Game
     public class BoardActivityTracker
     {
         int _activeCount;
-        bool _isFrozen;
+        int _freezeCount;
 
         readonly Subject<bool> _onIdleChanged = new();
         public Observable<bool> OnIdleChanged => _onIdleChanged.AsObservable();
@@ -30,7 +30,7 @@ namespace Game
         public Observable<Unit> OnUnfrozen => _onUnfrozen.AsObservable();
 
         public bool IsIdle => _activeCount == 0;
-        public bool IsFrozen => _isFrozen;
+        public bool IsFrozen => _freezeCount > 0;
 
         public IDisposable BeginActivity()
         {
@@ -52,13 +52,15 @@ namespace Game
             if (IsIdle) _onIdleChanged.OnNext(true);
         }
 
-        public void Freeze() => _isFrozen = true;
+        public void Freeze() => _freezeCount++;
 
         public void Unfreeze()
         {
-            if (!_isFrozen) return;
-            _isFrozen = false;
-            _onUnfrozen.OnNext(Unit.Default);
+            if (_freezeCount <= 0) 
+                throw new InvalidOperationException("Unfreeze without Freeze");
+            _freezeCount--;
+            if (_freezeCount == 0)
+                _onUnfrozen.OnNext(Unit.Default);
         }
 
         readonly struct ActivityScope : IDisposable

@@ -18,23 +18,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2562336379352237832, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Name
-      value: PowerUpPlane
+      value: PowerUpBalloon
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408337057578651200, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.8
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -22.7
+      value: -42.9
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_ConstrainProportionsScale
@@ -123,5 +143,36 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5083558805096351230, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2327686479542612707}
   m_SourcePrefab: {fileID: 100100000, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+--- !u!1 &2955485718297784352 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5083558805096351230, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+  m_PrefabInstance: {fileID: 8038805860634523102}
+  m_PrefabAsset: {fileID: 0}
+--- !u!223 &2327686479542612707
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2955485718297784352}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 1
+  m_TargetDisplay: 0

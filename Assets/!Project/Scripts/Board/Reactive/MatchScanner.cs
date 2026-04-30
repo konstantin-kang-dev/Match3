@@ -35,7 +35,7 @@ namespace Game
         {
             if (slot.State != CellState.Occupied) return;
 
-            // Сканируем матчи через эту клетку
+            
             ScanAndResolve(slot.Position).Forget();
         }
 

@@ -95,24 +95,40 @@ namespace Game
                 foreach (var slot in slotsToFinalize)
                     slot.SetEmpty();
 
-                foreach (var (powerUp, slot) in powerUpsToActivate)
+                if (powerUpsToActivate.Count > 0)
                 {
-                    Debug.Log($"[BoardMutator] PowerUp {powerUp.Kind} isActivating = {powerUp.IsActivating}");
-                    powerUp.SetActivating(true);
-                    _tracker.Freeze();
-                    try
-                    {
-                        var ctx = new ActivationContext(powerUp.OccupiedCell, powerUp);
-                        await powerUp.PowerUp.Activate(ctx, context);
-                        powerUp.DestroyItem(DestroyMode.Instant);
-                        slot.SetEmpty();
-                    }
-                    finally
-                    {
-                        powerUp.SetActivating(false);
-                        _tracker.Unfreeze();
-                    }
+                    var activationTasks = new List<UniTask>(powerUpsToActivate.Count);
+                    foreach (var (powerUp, slot) in powerUpsToActivate)
+                        activationTasks.Add(ActivatePowerUp(powerUp, slot, context));
+    
+                    await UniTask.WhenAll(activationTasks);
                 }
+            }
+        }
+        
+        async UniTask ActivatePowerUp(PlayfieldItem powerUpItem, CellSlot slot, IBoardContext context)
+        {
+            powerUpItem.SetActivating(true);
+            _tracker.Freeze();
+            try
+            {
+                var ctx = new ActivationContext(powerUpItem.OccupiedCell, powerUpItem);
+                await powerUpItem.PowerUp.Activate(ctx, context);
+
+                if (!powerUpItem.PowerUp.SelfDestroys)
+                {
+                    powerUpItem.DestroyItem(DestroyMode.Instant);
+                    slot.SetEmpty();
+                }
+                else
+                {
+                    slot.SetEmpty();
+                }
+            }
+            finally
+            {
+                powerUpItem.SetActivating(false);
+                _tracker.Unfreeze();
             }
         }
 
@@ -140,7 +156,7 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnPlane(_gridManager.PlayfieldItemsContainer);
-            _animator.PlayPlaneSpawn(item);
+            _animator.PlayBalloonSpawn(item);
             _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;

@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 738500914691032154, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 5ff652ad54c80494fa3de15daea78832, type: 3}
+      objectReference: {fileID: 21300000, guid: 31b4302a3edc0bc40a86bf032b28eb9b, type: 3}
     - target: {fileID: 774735724347376362, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_SortingLayer
       value: 1
@@ -33,8 +33,16 @@ PrefabInstance:
       value: 0.43725026
       objectReference: {fileID: 0}
     - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -14
+      value: -20.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781768649707826689, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8147572699037632774, guid: b45b1e33927f4c24ab9ce8de999f3ac2, type: 3}
       propertyPath: m_SortingLayer

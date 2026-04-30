@@ -1,6 +1,8 @@
-﻿using R3;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 using Game.Utils;
 using VContainer.Unity;
@@ -12,74 +14,68 @@ namespace Game
         readonly BoardState _board;
         readonly PlayfieldItemsFactory _factory;
         readonly GridManager _gridManager;
-        readonly ColumnsCoordinator _coordinator;
         readonly BoardActivityTracker _tracker;
-        readonly CompositeDisposable _disposables = new();
+
+        
+        
+        
+        const float TICK_INTERVAL = 0.08f;
+
+        CancellationTokenSource _cts;
 
         public RefillSpawner(
             BoardState board,
             PlayfieldItemsFactory factory,
             GridManager gridManager,
-            ColumnsCoordinator coordinator,
             BoardActivityTracker tracker)
         {
             _board = board;
             _factory = factory;
             _gridManager = gridManager;
-            _coordinator = coordinator;
             _tracker = tracker;
         }
 
         public void Start()
         {
-            _coordinator.OnColumnNeedsRefill
-                .Subscribe(SpawnInColumn)
-                .AddTo(_disposables);
+            _cts = new CancellationTokenSource();
+            TickLoop(_cts.Token).Forget();
         }
 
-        void SpawnInColumn(int columnIndex)
+        async UniTaskVoid TickLoop(CancellationToken token)
         {
-            if (_tracker.IsFrozen) 
+            while (!token.IsCancellationRequested)
             {
-                return;
-            }
-            var topEmpty = FindTopEmpty(columnIndex);
-            if (topEmpty == null) 
-            {
-                return;
-            }
+                await UniTask.Delay(TimeSpan.FromSeconds(TICK_INTERVAL), cancellationToken: token);
 
-            // Спавним фишку
-            var color = GetTypeWithoutMatch(topEmpty.Position);
-            var item = _factory.SpawnColored(color, _gridManager.PlayfieldItemsContainer);
-            item.MarkRefillFalling(true);
+                if (_tracker.IsFrozen) continue;
+
+                for (int x = 0; x < _board.Size.x; x++)
+                    TrySpawnTopOfColumn(x);
+            }
+        }
+
+        void TrySpawnTopOfColumn(int columnIndex)
+        {
+            int topY = _board.Size.y - 1;
+            var topSlot = _board.Get(new Vector2Int(columnIndex, topY));
+
             
-            // Стартовая позиция — над доской
+            
+            if (topSlot.State != CellState.Empty) return;
+
+            var color = GetTypeWithoutMatch(topSlot.Position);
+            var item = _factory.SpawnColored(color, _gridManager.PlayfieldItemsContainer);
+
             Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y);
             Vector2 startWorldPos = _gridManager.GetPositionForCell(virtualSourceCell);
             item.MoveTo(startWorldPos, MoveAnimationType.None);
             item.PlaySpawnAnimation();
 
-            // Запускаем падение через слот
-            topEmpty.SetFalling(item, virtualSourceCell);
-            Debug.Log($"[RefillSpawner] Spawned cell in y={virtualSourceCell}");
-        }
-
-        CellSlot FindTopEmpty(int columnIndex)
-        {
-            // Ищем самую высокую Empty клетку, выше которой нет Falling/Occupied
-            for (int y = _board.Size.y - 1; y >= 0; y--)
-            {
-                var slot = _board.Get(new Vector2Int(columnIndex, y));
-                if (slot.State == CellState.Empty)
-                    return slot;
-            }
-            return null;
+            topSlot.SetFalling(item, virtualSourceCell);
         }
 
         PlayfieldItemColorType GetTypeWithoutMatch(Vector2Int pos)
         {
-            // Старая логика из BoardFiller — учёт двух соседей слева и снизу
             var forbidden = new HashSet<PlayfieldItemColorType>();
             int x = pos.x;
             int y = pos.y;
@@ -100,7 +96,6 @@ namespace Game
                     forbidden.Add(down1.Color.Value);
             }
 
-            // Защита от квадрата 2×2
             if (x >= 1 && y >= 1)
             {
                 var left = _board.Get(new Vector2Int(x - 1, y)).Item;
@@ -122,7 +117,8 @@ namespace Game
 
         public void Dispose()
         {
-            _disposables.Dispose();
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
     }
 }

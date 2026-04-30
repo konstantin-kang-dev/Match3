@@ -11,6 +11,7 @@ namespace Game
         UniTask DestroyCells(IEnumerable<Vector2Int> cells, DestroyMode mode = DestroyMode.Animated, bool playVfx = true);
         IEnumerable<Vector2Int> GetCellsInRadius(Vector2Int center, int radius);
         Vector2Int? FindRandomColoredCell();
+        Vector2Int GetRandomCell();
         IEnumerable<Vector2Int> GetCellsByColor(PlayfieldItemColorType color);
         PlayfieldItemColorType? GetDominantColor();
         Vector2 GetWorldPosition(Vector2Int cell);

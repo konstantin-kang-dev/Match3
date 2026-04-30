@@ -30,7 +30,7 @@ namespace Game
             for (int ring = 0; ring <= _explosionRadius; ring++)
             {
                 var cells = GetRingCells(activationContext.Origin, ring, context);
-                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, ring * 0.07f));
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, ring * 0.12f));
             }
 
             await UniTask.WhenAll(waveTasks);

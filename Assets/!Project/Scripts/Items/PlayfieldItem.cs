@@ -20,15 +20,10 @@ namespace Game
         private bool _disposed;
         public bool IsDisposed => _disposed;
         public bool IsActivating { get; private set; }
-        public bool IsRefillFalling { get; private set; }
 
         internal void SetActivating(bool value)
         {
             IsActivating = value;
-        }
-        internal void MarkRefillFalling(bool value)
-        {
-            IsRefillFalling = value;
         }
         public PlayfieldItem(ISwapRequester swapRequester, GridManager gridManager)
         {

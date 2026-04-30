@@ -57,7 +57,7 @@ namespace Game
                 if (context.IsValidCell(left)) cells.Add(left);
                 if (dist != 0 && context.IsValidCell(right)) cells.Add(right);
 
-                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.04f));
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.05f));
             }
 
             await UniTask.WhenAll(waveTasks);
@@ -76,7 +76,7 @@ namespace Game
                 if (context.IsValidCell(down)) cells.Add(down);
                 if (dist != 0 && context.IsValidCell(up)) cells.Add(up);
 
-                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.04f));
+                waveTasks.Add(FireDestroyWithDelayAsync(cells, context, dist * 0.05f));
             }
 
             await UniTask.WhenAll(waveTasks);

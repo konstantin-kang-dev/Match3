@@ -41,9 +41,9 @@ namespace Game
                 yield return _cells[x, y];
         }
 
-        // Атомарный обмен Item'ов между двумя Occupied слотами без эмита событий.
-        // Используется только для пользовательского свапа — каскады/падения это не должны триггерить.
-        // Матч-детекцию после свапа вызывает PlayfieldManager явно.
+        
+        
+        
         public void Swap(Vector2Int a, Vector2Int b)
         {
             var slotA = _cells[a.x, a.y];

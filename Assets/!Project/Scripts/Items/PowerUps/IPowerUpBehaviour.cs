@@ -6,5 +6,6 @@ namespace Game
     public interface IPowerUpBehaviour
     {
         UniTask Activate(ActivationContext activationContext, IBoardContext board);
+        bool SelfDestroys => false;
     }
 }

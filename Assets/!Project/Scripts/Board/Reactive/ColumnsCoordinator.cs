@@ -12,9 +12,6 @@ namespace Game
         readonly List<ColumnSimulator> _columns = new();
         readonly CompositeDisposable _disposables = new();
 
-        readonly Subject<int> _onColumnNeedsRefill = new();
-        public Observable<int> OnColumnNeedsRefill => _onColumnNeedsRefill.AsObservable();
-
         public ColumnsCoordinator(BoardState board, BoardActivityTracker tracker)
         {
             _board = board;
@@ -30,15 +27,9 @@ namespace Game
                     slots.Add(slot);
 
                 var sim = new ColumnSimulator(x, slots, _tracker);
-                sim.OnNeedsRefill
-                    .Subscribe(idx => _onColumnNeedsRefill.OnNext(idx))
-                    .AddTo(_disposables);
-
                 _columns.Add(sim);
             }
 
-            // На Unfreeze пинаем все колонки — Empty-события под freeze
-            // были проигнорированы и без пинка колонка зависнет с пустотой внутри.
             _tracker.OnUnfrozen
                 .Subscribe(_ => ResumeAllColumns())
                 .AddTo(_disposables);
@@ -54,7 +45,6 @@ namespace Game
         {
             foreach (var col in _columns) col.Dispose();
             _disposables.Dispose();
-            _onColumnNeedsRefill.Dispose();
         }
     }
 }

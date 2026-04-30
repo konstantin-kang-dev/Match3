@@ -33,11 +33,11 @@ public class GridSDFController : MonoBehaviour
         _gridTex.filterMode = FilterMode.Point;
         _gridTex.wrapMode = TextureWrapMode.Clamp;
 
-        // Все ячейки активны по умолчанию
+        
         for (var i = 0; i < _gridData.Length; i++)
             _gridData[i] = 1f;
 
-        // Выставляем размер RectTransform под грид
+        
         _rt.sizeDelta = new Vector2(cols * cellSize, rows * cellSize);
 
         _dirty = true;

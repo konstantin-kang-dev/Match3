@@ -42,7 +42,7 @@ namespace Game
 
         public PlayfieldItem SpawnPlane(Transform parent)
         {
-            var config = _db.Get<PlaneItemConfig>(PlayfieldItemKind.Plane);
+            var config = _db.Get<BalloonItemConfig>(PlayfieldItemKind.Balloon);
             var behaviour = _behaviourFactory.CreatePlane(config);
             return SpawnFromConfig(config, behaviour, parent);
         }

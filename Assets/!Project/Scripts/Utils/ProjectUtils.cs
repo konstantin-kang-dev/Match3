@@ -64,11 +64,11 @@ namespace Game.Utils
             var w = maxX - minX + 1;
             var h = maxY - minY + 1;
 
-            // 1. Квадрат 2×2 — высший приоритет
+            
             if (count == 4 && w == 2 && h == 2)
                 return MatchShape.Match4Square;
 
-            // 2. Чистая линия — bbox толщиной 1 И все клетки bbox заполнены
+            
             var isPureLine = (w == 1 || h == 1) && count == Mathf.Max(w, h);
 
             if (isPureLine)
@@ -80,7 +80,7 @@ namespace Game.Utils
                 if (count >= 5) return MatchShape.Match5Line;
             }
 
-            // 3. Всё остальное — L/T/кластер → Bomb
+            
             return MatchShape.Match5LT;
         }
 

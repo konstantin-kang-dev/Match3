@@ -53,6 +53,11 @@ namespace Game
             if (coloredCells.Count == 0) return null;
             return coloredCells[Random.Range(0, coloredCells.Count)];
         }
+        public Vector2Int GetRandomCell()
+        {
+            var allCells = _board.AllCells().ToList();
+            return allCells[Random.Range(0, allCells.Count)].Position;
+        }
 
         public IEnumerable<Vector2Int> GetCellsByColor(PlayfieldItemColorType color)
         {
@@ -85,8 +90,8 @@ namespace Game
 
         public Vector2 GetWorldPosition(Vector2Int cell) => _gridManager.GetPositionForCell(cell);
 
-        // Клетка является валидной целью для PowerUp'а, если в ней реально стоит/летит фишка,
-        // и она не находится в процессе уничтожения. Empty / Destroying — невалидны.
+        
+        
         static bool IsTargetable(CellSlot slot)
             => slot.State == CellState.Occupied || slot.State == CellState.Falling;
     }

@@ -23,8 +23,16 @@ namespace Game
         public void SetFalling(PlayfieldItem item, Vector2Int sourceCell)
         {
             Item = item;
-            ChangeState(CellState.Falling);
-            _onFallStarted.OnNext(new FallStartedEvent(item, sourceCell, Position));
+            if (State != CellState.Falling)
+            {
+                State = CellState.Falling;
+                _onFallStarted.OnNext(new FallStartedEvent(item, sourceCell, Position));
+                _onStateChanged.OnNext(this);
+            }
+            else
+            {
+                _onFallStarted.OnNext(new FallStartedEvent(item, sourceCell, Position));
+            }
         }
         
         public void SetOccupied(PlayfieldItem item)

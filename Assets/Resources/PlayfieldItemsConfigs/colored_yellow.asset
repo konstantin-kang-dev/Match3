@@ -12,7 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc7518fd66cd0b845839b9b8e305d013, type: 3}
   m_Name: colored_yellow
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.ColoredItemConfig
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
   _kind: 0
-  _icon: {fileID: 21300000, guid: af308584ff65572458b287a219367725, type: 3}
+  _icon: {fileID: 21300000, guid: 99ba52547db08ef4b899c28b730327bb, type: 3}
   _prefab: {fileID: 2566849294658454004, guid: c1e2c087daaae704c86019dbc748c08b, type: 3}
   _color: 3

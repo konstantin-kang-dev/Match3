@@ -44,7 +44,7 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
     {
         _isDragged = false;
         _dragStartPos = eventData.position;
-        //HandleDrag(eventData.position);
+        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -59,8 +59,8 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //_dragStartPos = eventData.position;
-        //HandleDrag(eventData.position);
+        
+        
     }
 
     public void Init(PlayfieldItemConfig config)
@@ -115,43 +115,20 @@ public class PlayfieldItemView : MonoBehaviour, IBeginDragHandler, IDragHandler,
             case MoveAnimationType.Move:
                 _rectTransform.DOAnchorPos(targetPos, duration);
                 break;
-            case MoveAnimationType.Bounce:
-                //_rectTransform.DOAnchorPos(targetPos, duration).SetEase(Ease.InQuad);
-
-                if (_spawnAnim != null) _spawnAnim.Kill();
-
-                var sequence = DOTween.Sequence();
-
-                Tween moveAnim = _rectTransform.DOAnchorPos(targetPos, duration).SetEase(Ease.InSine);
-                sequence.Append(moveAnim);
-
-                var squashInScale = new Vector3(1.05f, 0.95f, 1f);
-                Tween bounceInAnim = _rectTransform.DOScale(squashInScale, 0.1f);
-                sequence.Append(bounceInAnim);
-
-                var overshootYPos = targetPos.y - 10f;
-                Tween overshootInAnim = _rectTransform.DOAnchorPosY(overshootYPos, 0.1f);
-                sequence.Join(overshootInAnim);
-
-                var squashOutScale = new Vector3(1f, 1f, 1f);
-                Tween bounceOutAnim = _rectTransform.DOScale(squashOutScale, 0.1f);
-                sequence.Append(bounceOutAnim);
-
-                Tween overshootOutAnim = _rectTransform.DOAnchorPosY(targetPos.y, 0.1f);
-                sequence.Join(overshootOutAnim);
-                break;
         }
     }
 
     public void Destroy(DestroyMode mode)
     {
+        _rectTransform.DOKill();
+        
         Tween destroyAnim = _rectTransform
             .DOScale(Vector3.zero, ProjectConstants.ITEM_DESTROY_ANIM_DURATION)
             .SetEase(Ease.OutSine)
             .OnComplete(() =>
             {
                 _onDestroyed.OnNext(true);
-                Destroy(gameObject, 2f);
+                Destroy(gameObject);
             });
 
         if (mode == DestroyMode.Instant)

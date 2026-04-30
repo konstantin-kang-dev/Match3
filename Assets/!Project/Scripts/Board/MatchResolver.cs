@@ -83,18 +83,18 @@ namespace Game
             foreach (var item in items)
                 item.DestroyItem(DestroyMode.Instant);
 
-            // Item'ы уничтожены — синхронизируем слоты, чтобы не было висячих ссылок
-            // на disposed-объекты. Без событий: слоты остаются Destroying.
+            
+            
             foreach (var slot in slots)
                 slot.ClearItem();
 
-            // spawn-клетка переходит Destroying -> Occupied(PowerUp) одним шагом,
-            // без промежуточного Empty. Симулятор окна не видит.
+            
+            
             ExecuteSpawn(spawn);
 
-            // Остальные клетки группы освобождаем ПОСЛЕ ExecuteSpawn. Если бы это шло до,
-            // ColumnSimulator увидел бы Empty ниже spawn-клетки и попытался уронить
-            // только что заспавненный PowerUp.
+            
+            
+            
             foreach (var slot in slots)
             {
                 if (slot.Position == spawn.Cell) continue;
@@ -161,7 +161,7 @@ namespace Game
                 case PlayfieldItemKind.Bomb:
                     _mutator.SpawnBombAt(plan.Cell);
                     break;
-                case PlayfieldItemKind.Plane:
+                case PlayfieldItemKind.Balloon:
                     _mutator.SpawnPlaneAt(plan.Cell);
                     break;
                 case PlayfieldItemKind.Disco:
@@ -174,7 +174,7 @@ namespace Game
         {
             MatchShape.Match4Horizontal => PlayfieldItemKind.Rocket,
             MatchShape.Match4Vertical => PlayfieldItemKind.Rocket,
-            MatchShape.Match4Square => PlayfieldItemKind.Plane,
+            MatchShape.Match4Square => PlayfieldItemKind.Balloon,
             MatchShape.Match5Line => PlayfieldItemKind.Disco,
             MatchShape.Match5LT => PlayfieldItemKind.Bomb,
             _ => null

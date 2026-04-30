@@ -20,7 +20,7 @@ namespace Game
         PlayfieldItemColorType? GetColor(Vector2Int pos)
         {
             var slot = _board.Get(pos);
-            // Только Occupied клетки участвуют в матче (Falling — ещё летит, нельзя матчить)
+            
             if (slot.State != CellState.Occupied) return null;
             return slot.Item?.Color;
         }

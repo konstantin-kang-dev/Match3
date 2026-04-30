@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e9343fdc9538df4d896599ff32628ac, type: 3}
-  m_Name: powerup_plane
+  m_Name: powerup_balloon
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.PlaneItemConfig
   _kind: 102
   _icon: {fileID: 21300000, guid: 561c4d26ca6eaeb4daba309b321ca80f, type: 3}

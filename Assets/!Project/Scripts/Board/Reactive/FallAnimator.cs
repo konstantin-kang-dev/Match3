@@ -45,43 +45,43 @@ namespace Game
             {
                 var item = evt.Item;
                 var rt = item.RectTransform;
+                rt.DOKill();
+                
                 Vector2 targetPos = _gridManager.GetPositionForCell(evt.ToCell);
 
                 float distance = Vector2.Distance(rt.anchoredPosition, targetPos);
                 float duration = distance / 2200f;
                 
-                var sequence = DOTween.Sequence();
-
                 Tween moveAnim = rt.DOAnchorPos(targetPos, duration).SetEase(Ease.Linear);
-                sequence.Append(moveAnim);
-
-                var squashInScale = new Vector3(1.05f, 0.95f, 1f);
-                Tween bounceInAnim = rt.DOScale(squashInScale, 0.1f);
-                sequence.Append(bounceInAnim);
-
-                var overshootYPos = targetPos.y - 10f;
-                Tween overshootInAnim = rt.DOAnchorPosY(overshootYPos, 0.1f);
-                sequence.Join(overshootInAnim);
-
-                var squashOutScale = new Vector3(1f, 1f, 1f);
-                Tween bounceOutAnim = rt.DOScale(squashOutScale, 0.1f);
-                sequence.Append(bounceOutAnim);
-
-                Tween overshootOutAnim = rt.DOAnchorPosY(targetPos.y, 0.1f);
-                sequence.Join(overshootOutAnim);
                 
-                await sequence.AsyncWaitForCompletion().AsUniTask();
-                // За время полёта target slot мог быть угнан: PowerUp занял клетку (PlaceAt),
-                // Item был уничтожен (DOKill в DestroyCells + DestroyItem), MergeAnimation увёл item.
-                // Если slot уже не Falling с нашим item — финализировать SetOccupied нельзя,
-                // иначе перезатираем чужое состояние.
+                await moveAnim.AsyncWaitForCompletion().AsUniTask();
+                
                 var targetSlot = _board.Get(evt.ToCell);
                 if (targetSlot.State != CellState.Falling || targetSlot.Item != item)
                     return;
-
+                
                 item.OccupyCell(evt.ToCell);
                 targetSlot.SetOccupied(item);
-                item.MarkRefillFalling(false);
+                if (targetSlot.State != CellState.Occupied)
+                    return;
+                
+                var bounceSeq = DOTween.Sequence().SetTarget(rt);
+                var squashInScale = new Vector3(1.05f, 0.95f, 1f);
+                Tween bounceInAnim = rt.DOScale(squashInScale, 0.1f);
+                bounceSeq.Append(bounceInAnim);
+
+                var overshootYPos = targetPos.y - 10f;
+                Tween overshootInAnim = rt.DOAnchorPosY(overshootYPos, 0.1f);
+                bounceSeq.Join(overshootInAnim);
+                
+                var squashOutScale = new Vector3(1f, 1f, 1f);
+                Tween bounceOutAnim = rt.DOScale(squashOutScale, 0.1f);
+                bounceSeq.Append(bounceOutAnim);
+                
+                Tween overshootOutAnim = rt.DOAnchorPosY(targetPos.y, 0.1f);
+                bounceSeq.Join(overshootOutAnim);
+                
+                
             }
         }
 

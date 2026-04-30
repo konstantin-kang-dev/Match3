@@ -17,7 +17,7 @@ public enum PlayfieldItemKind
 
     Rocket = 100,
     Bomb = 101,
-    Plane = 102,
+    Balloon = 102,
     Disco = 103
 }
 

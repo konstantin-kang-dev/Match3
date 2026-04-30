@@ -2,8 +2,8 @@
 
 namespace Game.Configs
 {
-    [CreateAssetMenu(menuName = "GameData/Items/Plane")]
-    public class PlaneItemConfig : PlayfieldItemConfig
+    [CreateAssetMenu(menuName = "GameData/Items/Balloon")]
+    public class BalloonItemConfig : PlayfieldItemConfig
     {
         [SerializeField] private float _flySpeed = 8f;
         [SerializeField] private int _targetsCount = 1;
