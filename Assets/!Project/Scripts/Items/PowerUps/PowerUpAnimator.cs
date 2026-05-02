@@ -12,18 +12,19 @@ namespace Game
         {
             _gridManager = gridManager;
         }
-        public async UniTask PlayMergeAnimation(List<PlayfieldItem> items, Vector2 targetPos, float duration = 0.2f)
+
+        public async UniTask PlayMergeAnimation(List<PlayfieldItemView> views, Vector2 targetPos, float duration = 0.2f)
         {
             var tasks = new List<UniTask>();
-            foreach (var item in items)
-                tasks.Add(AnimateOneToTarget(item, targetPos, duration));
+            foreach (var view in views)
+                tasks.Add(AnimateOneToTarget(view, targetPos, duration));
 
             await UniTask.WhenAll(tasks);
         }
 
-        async UniTask AnimateOneToTarget(PlayfieldItem item, Vector2 targetPos, float duration)
+        async UniTask AnimateOneToTarget(PlayfieldItemView view, Vector2 targetPos, float duration)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
 
             var seq = DOTween.Sequence();
             seq.Append(rt.DOAnchorPos(targetPos, duration).SetEase(Ease.InQuad));
@@ -31,73 +32,71 @@ namespace Game
 
             await seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayRocketSpawn(PlayfieldItem item)
+
+        public UniTask PlayRocketSpawn(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
 
             seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 15f), 0.15f).SetEase(Ease.OutBack));
-            
+
             seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 0f), 0.15f).SetEase(Ease.OutBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayRocketActivation(PlayfieldItem item)
+
+        public UniTask PlayRocketActivation(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
 
             seq.Append(rt.DOScale(new Vector3(0f, 0f, 0f), 0.01f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayBombSpawn(PlayfieldItem item)
+
+        public UniTask PlayBombSpawn(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
 
             seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 15f), 0.15f).SetEase(Ease.OutBack));
-            
+
             seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 0f), 0.15f).SetEase(Ease.OutBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayBombActivation(PlayfieldItem item)
+
+        public UniTask PlayBombActivation(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
 
             seq.Append(rt.DOScale(new Vector3(0f, 0f, 1f), 0.01f).SetEase(Ease.InBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayBalloonSpawn(PlayfieldItem item)
+
+        public UniTask PlayBalloonSpawn(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
-            
+
             seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.15f).SetEase(Ease.OutBack));
-            
             seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.15f).SetEase(Ease.OutBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
 
-        public UniTask PlayBalloonActivation(PlayfieldItem item, Vector2Int targetCell)
+        public UniTask PlayBalloonActivation(PlayfieldItemView view, Vector2Int targetCell)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
             Vector2 targetPos = _gridManager.GetPositionForCell(targetCell);
-            Vector2 startPos = rt.anchoredPosition;
 
             seq.Append(rt.DOAnchorPos(targetPos, 0.6f).SetEase(Ease.InOutQuad));
 
@@ -110,24 +109,24 @@ namespace Game
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
-        
-        public UniTask PlayDiscoSpawn(PlayfieldItem item)
+
+        public UniTask PlayDiscoSpawn(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var seq = DOTween.Sequence();
 
             seq.Append(rt.DOScale(new Vector3(1.3f, 1.3f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 15f), 0.15f).SetEase(Ease.OutBack));
-            
+
             seq.Append(rt.DOScale(new Vector3(1f, 1f, 1f), 0.15f).SetEase(Ease.OutBack));
             seq.Join(rt.DORotate(new Vector3(0f, 0f, 0f), 0.15f).SetEase(Ease.OutBack));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }
 
-        public UniTask PlayDiscoActivation(PlayfieldItem item)
+        public UniTask PlayDiscoActivation(PlayfieldItemView view)
         {
-            var rt = item.RectTransform;
+            var rt = view.RectTransform;
             var startY = rt.anchoredPosition.y;
             var seq = DOTween.Sequence();
 

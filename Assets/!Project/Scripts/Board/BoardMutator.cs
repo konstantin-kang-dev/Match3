@@ -50,7 +50,7 @@ namespace Game
                     var disposed = s.Item != null && s.Item.IsDisposed;
                 }
 
-                var powerUpsToActivate = new List<(PlayfieldItem item, CellSlot slot)>();
+                var powerUpsToActivate = new List<(IBoardItem item, CellSlot slot)>();
                 var slotsToFinalize = new List<CellSlot>();
 
                 foreach (var cell in cellsList)
@@ -63,9 +63,6 @@ namespace Game
                     if (item == null) continue;
                     
                     if (item.IsActivating) continue;
-                    
-                    if (slot.State == CellState.Falling)
-                        item.RectTransform.DOKill();
 
                     slot.SetDestroying();
 
@@ -113,7 +110,7 @@ namespace Game
             }
         }
         
-        async UniTask ActivatePowerUp(PlayfieldItem powerUpItem, CellSlot slot, IBoardContext context)
+        async UniTask ActivatePowerUp(IBoardItem powerUpItem, CellSlot slot, IBoardContext context)
         {
             powerUpItem.SetActivating(true);
             _tracker.Freeze();
@@ -143,7 +140,7 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnRocket(orientation, _gridManager.PlayfieldItemsContainer);
-            _animator.PlayRocketSpawn(item);
+            _animator.PlayRocketSpawn(item.View);
             _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
@@ -153,7 +150,7 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnBomb(_gridManager.PlayfieldItemsContainer);
-            _animator.PlayBombSpawn(item);
+            _animator.PlayBombSpawn(item.View);
             _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
@@ -163,7 +160,7 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnPlane(_gridManager.PlayfieldItemsContainer);
-            _animator.PlayBalloonSpawn(item);
+            _animator.PlayBalloonSpawn(item.View);
             _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
@@ -173,7 +170,7 @@ namespace Game
         {
             DestroyExistingAt(cell);
             var item = _factory.SpawnDisco(_gridManager.PlayfieldItemsContainer);
-            _animator.PlayDiscoSpawn(item);
+            _animator.PlayDiscoSpawn(item.View);
             _vfxService.PlayAtCell(PlayfieldVfxType.PowerUpSpawn, cell);
             PlaceAt(cell, item);
             return item;
@@ -195,7 +192,7 @@ namespace Game
             var slot = _board.Get(cell);
             item.OccupyCell(cell);
             var pos = _gridManager.GetPositionForCell(cell);
-            item.MoveTo(pos, MoveAnimationType.None);
+            item.View.MoveTo(pos, MoveAnimationType.None);
             slot.SetOccupied(item);
         }
     }

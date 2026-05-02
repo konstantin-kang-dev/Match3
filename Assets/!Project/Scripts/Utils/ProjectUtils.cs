@@ -60,38 +60,7 @@ namespace Game.Utils
 
             return available[Random.Range(0, available.Count)];
         }
-
-        public static MatchShape Classify(List<Vector2Int> cells)
-        {
-            var count = cells.Count;
-
-            var minX = cells.Min(c => c.x);
-            var maxX = cells.Max(c => c.x);
-            var minY = cells.Min(c => c.y);
-            var maxY = cells.Max(c => c.y);
-
-            var w = maxX - minX + 1;
-            var h = maxY - minY + 1;
-
-            
-            if (count == 4 && w == 2 && h == 2)
-                return MatchShape.Match4Square;
-
-            
-            var isPureLine = (w == 1 || h == 1) && count == Mathf.Max(w, h);
-
-            if (isPureLine)
-            {
-                var isHorizontal = h == 1;
-
-                if (count == 3) return MatchShape.Match3;
-                if (count == 4) return isHorizontal ? MatchShape.Match4Horizontal : MatchShape.Match4Vertical;
-                if (count >= 5) return MatchShape.Match5Line;
-            }
-
-            
-            return MatchShape.Match5LT;
-        }
+        
 
         public static string FormatNumber(float value)
         {

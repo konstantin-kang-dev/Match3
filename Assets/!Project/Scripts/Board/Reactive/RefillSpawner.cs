@@ -68,8 +68,8 @@ namespace Game
 
             Vector2Int virtualSourceCell = new Vector2Int(columnIndex, _board.Size.y);
             Vector2 startWorldPos = _gridManager.GetPositionForCell(virtualSourceCell);
-            item.MoveTo(startWorldPos, MoveAnimationType.None);
-            item.PlaySpawnAnimation();
+            item.View.MoveTo(startWorldPos, MoveAnimationType.None);
+            item.View.PlaySpawnAnimation();
 
             topSlot.SetFalling(item, virtualSourceCell);
         }
@@ -108,11 +108,11 @@ namespace Game
             return ProjectUtils.GetRandomPlayfieldItemColorTypeExcluding(forbidden);
         }
 
-        bool HaveSameColor(PlayfieldItem a, PlayfieldItem b)
+        bool HaveSameColor(IBoardItem a, IBoardItem b)
         {
             return a != null && b != null
-                && a.Color.HasValue && b.Color.HasValue
-                && a.Color.Value == b.Color.Value;
+                             && a.Color.HasValue && b.Color.HasValue
+                             && a.Color.Value == b.Color.Value;
         }
 
         public void Dispose()

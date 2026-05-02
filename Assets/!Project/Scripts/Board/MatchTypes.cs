@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Game.Utils;
 
 namespace Game
 {
     public enum MatchShape
     {
+        None,
         Match3,
         Match4Horizontal,
         Match4Vertical,
@@ -17,14 +17,20 @@ namespace Game
     public readonly struct MatchGroup
     {
         public readonly IReadOnlyList<Vector2Int> Cells;
+        public readonly IReadOnlyList<Vector2Int> ShapeCells;
         public readonly PlayfieldItemColorType Color;
         public readonly MatchShape Shape;
 
-        public MatchGroup(List<Vector2Int> cells, PlayfieldItemColorType type)
+        public MatchGroup(
+            IReadOnlyList<Vector2Int> cells,
+            IReadOnlyList<Vector2Int> shapeCells,
+            PlayfieldItemColorType color,
+            MatchShape shape)
         {
             Cells = cells;
-            Color = type;
-            Shape = ProjectUtils.Classify(cells);
+            ShapeCells = shapeCells;
+            Color = color;
+            Shape = shape;
         }
     }
 

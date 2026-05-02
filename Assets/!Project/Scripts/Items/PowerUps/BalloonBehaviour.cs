@@ -41,7 +41,7 @@ namespace Game
                 origin + Vector2Int.right,
             }.Where(context.IsValidCell).ToArray();
 
-            FlyAndExplode(activationContext.Self, crossCells, context).Forget();
+            FlyAndExplode(((PlayfieldItem)activationContext.Self), crossCells, context).Forget();
 
             return UniTask.CompletedTask;
         }
@@ -53,7 +53,7 @@ namespace Game
                 await context.DestroyCells(crossCells, DestroyMode.Instant);
 
                 Vector2Int target = context.GetRandomCell();
-                await _animator.PlayBalloonActivation(balloon, target);
+                await _animator.PlayBalloonActivation(balloon.View, target);
 
                 _vfxService.PlayAtCell(PlayfieldVfxType.BalloonImpact, target);
                 await context.DestroyCells(GetRingCells(target, 1, context), DestroyMode.Instant);

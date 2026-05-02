@@ -43,28 +43,29 @@ namespace Game
         {
             using (_tracker.BeginActivity())
             {
-                var item = evt.Item;
-                var rt = item.RectTransform;
+                var item = evt.Item as PlayfieldItem;
+                if (item == null) return;
+
+                var rt = item.View.RectTransform;
                 rt.DOKill();
-                
+
                 Vector2 targetPos = _gridManager.GetPositionForCell(evt.ToCell);
 
                 float distance = Vector2.Distance(rt.anchoredPosition, targetPos);
                 float duration = distance / 2200f;
-                
+
                 Tween moveAnim = rt.DOAnchorPos(targetPos, duration).SetEase(Ease.Linear);
-                
+
                 await moveAnim.AsyncWaitForCompletion().AsUniTask();
-                
+
                 var targetSlot = _board.Get(evt.ToCell);
                 if (targetSlot.State != CellState.Falling || targetSlot.Item != item)
                     return;
-                
+
                 item.OccupyCell(evt.ToCell);
                 targetSlot.SetOccupied(item);
                 if (targetSlot.State != CellState.Occupied)
                     return;
-                
                 var bounceSeq = DOTween.Sequence().SetTarget(rt);
                 var squashInScale = new Vector3(1.05f, 0.95f, 1f);
                 Tween bounceInAnim = rt.DOScale(squashInScale, 0.1f);

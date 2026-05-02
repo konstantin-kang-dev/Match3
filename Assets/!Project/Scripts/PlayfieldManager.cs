@@ -98,22 +98,20 @@ namespace Game
             SwapItems(from, to);
             await UniTask.WaitForSeconds(0.15f);
 
-            var groups = _matchDetector.FindMatches(new[] { from, to });
+            var components = _matchDetector.FindMatches(new[] { from, to });
+            var groups = MatchShapeRecognizer.BuildGroups(components);
 
             if (groups.Count == 0)
             {
-                // Откат — ходов нет.
                 RevertSwap();
                 await UniTask.WaitForSeconds(0.15f);
                 return;
             }
 
-            // Резолв запускаем явно — Scanner не слушает свапы.
-            // Дальнейшие каскады возьмёт на себя реактивный пайплайн через MatchScanner.
             await _matchResolver.Resolve(groups, swapCell: to, cascade: 0);
         }
 
-        async UniTask HandlePowerUpSwap(Vector2Int from, Vector2Int to, PlayfieldItem powerUpItem)
+        async UniTask HandlePowerUpSwap(Vector2Int from, Vector2Int to, IBoardItem powerUpItem)
         {
             var slotFrom = _board.Get(from);
             var targetItem = slotFrom.Item == powerUpItem ? _board.Get(to).Item : slotFrom.Item;
@@ -162,19 +160,16 @@ namespace Game
 
             var slotFrom = _board.Get(from);
             var slotTo = _board.Get(to);
-            var itemA = slotFrom.Item;
-            var itemB = slotTo.Item;
+            var itemA = slotFrom.Item as PlayfieldItem;
+            var itemB = slotTo.Item as PlayfieldItem;
 
-            // Логически: меняем Item'ы между слотами без событий.
             _board.Swap(from, to);
 
-            // Обновляем Item.OccupiedCell — это координата фишки на доске.
             itemA.OccupyCell(to);
             itemB.OccupyCell(from);
 
-            // Визуальная анимация — фишки физически летят в новые позиции.
-            itemA.MoveTo(_gridManager.GetPositionForCell(to), MoveAnimationType.Move);
-            itemB.MoveTo(_gridManager.GetPositionForCell(from), MoveAnimationType.Move);
+            itemA.View.MoveTo(_gridManager.GetPositionForCell(to), MoveAnimationType.Move);
+            itemB.View.MoveTo(_gridManager.GetPositionForCell(from), MoveAnimationType.Move);
         }
 
         void RevertSwap() => SwapItems(_lastSwapTo, _lastSwapFrom);

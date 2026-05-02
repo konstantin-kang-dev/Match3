@@ -20,7 +20,7 @@ namespace Game
 
         public async UniTask Activate(ActivationContext activationContext, IBoardContext context)
         {
-            await _animator.PlayBombActivation(activationContext.Self);
+            await _animator.PlayBombActivation(((PlayfieldItem)activationContext.Self).View);
             
             var origin = activationContext.Origin;
             

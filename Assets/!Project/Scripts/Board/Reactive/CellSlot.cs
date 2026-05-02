@@ -7,7 +7,7 @@ namespace Game
     {
         public Vector2Int Position { get; }
         public CellState State { get; private set; }
-        public PlayfieldItem Item { get; private set; }
+        public IBoardItem Item { get; private set; }
 
         readonly Subject<CellSlot> _onStateChanged = new();
         public Observable<CellSlot> OnStateChanged => _onStateChanged.AsObservable();
@@ -20,7 +20,7 @@ namespace Game
             State = CellState.Empty;
         }
 
-        public void SetFalling(PlayfieldItem item, Vector2Int sourceCell)
+        public void SetFalling(IBoardItem item, Vector2Int sourceCell)
         {
             Item = item;
             if (State != CellState.Falling)
@@ -34,8 +34,8 @@ namespace Game
                 _onFallStarted.OnNext(new FallStartedEvent(item, sourceCell, Position));
             }
         }
-        
-        public void SetOccupied(PlayfieldItem item)
+
+        public void SetOccupied(IBoardItem item)
         {
             Item = item;
             ChangeState(CellState.Occupied);

@@ -35,16 +35,35 @@ namespace Game
         {
             if (slot.State != CellState.Occupied) return;
 
-            
             ScanAndResolve(slot.Position).Forget();
         }
 
         async UniTask ScanAndResolve(Vector2Int pos)
         {
-            var groups = _detector.FindMatches(new[] { pos });
+            var components = _detector.FindMatches(new[] { pos });
+            if (components.Count == 0) return;
+
+            var groups = BuildGroups(components);
             if (groups.Count == 0) return;
 
             await _resolver.Resolve(groups, swapCell: null, cascade: 0);
+        }
+
+        List<MatchGroup> BuildGroups(List<MatchComponent> components)
+        {
+            var groups = new List<MatchGroup>(components.Count);
+            foreach (var component in components)
+            {
+                var recognized = MatchShapeRecognizer.Recognize(component.Cells);
+                if (!recognized.HasValue) continue;
+
+                groups.Add(new MatchGroup(
+                    cells: component.Cells,
+                    shapeCells: recognized.Value.ShapeCells,
+                    color: component.Color,
+                    shape: recognized.Value.Shape));
+            }
+            return groups;
         }
 
         public void Dispose()

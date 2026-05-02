@@ -4,12 +4,12 @@ namespace Game
 {
     public readonly struct CellMovement
     {
-        public readonly PlayfieldItem Item;
+        public readonly IBoardItem Item;
         public readonly Vector2Int FromCell;
         public readonly Vector2Int ToCell;
         public readonly bool IsNew;
 
-        public CellMovement(PlayfieldItem item, Vector2Int fromCell, Vector2Int toCell, bool isNew)
+        public CellMovement(IBoardItem item, Vector2Int fromCell, Vector2Int toCell, bool isNew)
         {
             Item = item;
             FromCell = fromCell;
@@ -20,24 +20,25 @@ namespace Game
 
     public readonly struct ExplosionReaction
     {
-        public readonly PlayfieldItem Item;
+        public readonly IBoardItem Item;
         public readonly Vector2 Direction;
         public readonly float Force;
 
-        public ExplosionReaction(PlayfieldItem item, Vector2 direction, float force)
+        public ExplosionReaction(IBoardItem item, Vector2 direction, float force)
         {
             Item = item;
             Direction = direction;
             Force = force;
         }
     }
+
     public readonly struct FallStartedEvent
     {
-        public readonly PlayfieldItem Item;
+        public readonly IBoardItem Item;
         public readonly Vector2Int FromCell;
         public readonly Vector2Int ToCell;
 
-        public FallStartedEvent(PlayfieldItem item, Vector2Int fromCell, Vector2Int toCell)
+        public FallStartedEvent(IBoardItem item, Vector2Int fromCell, Vector2Int toCell)
         {
             Item = item;
             FromCell = fromCell;

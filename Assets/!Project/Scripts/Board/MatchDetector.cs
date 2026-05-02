@@ -3,6 +3,18 @@ using UnityEngine;
 
 namespace Game
 {
+    public readonly struct MatchComponent
+    {
+        public readonly List<Vector2Int> Cells;
+        public readonly PlayfieldItemColorType Color;
+
+        public MatchComponent(List<Vector2Int> cells, PlayfieldItemColorType color)
+        {
+            Cells = cells;
+            Color = color;
+        }
+    }
+
     public class MatchDetector
     {
         private static readonly Vector2Int[] Dirs4 =
@@ -17,21 +29,18 @@ namespace Game
             _board = board;
         }
 
+        public List<MatchComponent> FindMatches(IEnumerable<Vector2Int> changedCells)
+        {
+            var matched = CollectMatchedCells(changedCells);
+            if (matched.Count == 0) return new List<MatchComponent>();
+            return GroupIntoComponents(matched);
+        }
+
         PlayfieldItemColorType? GetColor(Vector2Int pos)
         {
             var slot = _board.Get(pos);
-            
             if (slot.State != CellState.Occupied) return null;
             return slot.Item?.Color;
-        }
-
-        bool IsInBounds(Vector2Int pos) => _board.IsInBounds(pos);
-
-        public List<MatchGroup> FindMatches(IEnumerable<Vector2Int> changedCells)
-        {
-            var matched = CollectMatchedCells(changedCells);
-            if (matched.Count == 0) return new List<MatchGroup>();
-            return GroupIntoComponents(matched);
         }
 
         HashSet<Vector2Int> CollectMatchedCells(IEnumerable<Vector2Int> changedCells)
@@ -64,9 +73,9 @@ namespace Game
             return matched;
         }
 
-        private List<MatchGroup> GroupIntoComponents(HashSet<Vector2Int> matched)
+        List<MatchComponent> GroupIntoComponents(HashSet<Vector2Int> matched)
         {
-            var groups = new List<MatchGroup>();
+            var components = new List<MatchComponent>();
             var visited = new HashSet<Vector2Int>();
             var queue = new Queue<Vector2Int>();
 
@@ -74,10 +83,10 @@ namespace Game
             {
                 if (visited.Contains(start)) continue;
 
-                var type = GetColor(start);
-                if (!type.HasValue) continue;
+                var color = GetColor(start);
+                if (!color.HasValue) continue;
 
-                var component = new List<Vector2Int>();
+                var cells = new List<Vector2Int>();
                 queue.Clear();
                 queue.Enqueue(start);
                 visited.Add(start);
@@ -85,27 +94,27 @@ namespace Game
                 while (queue.Count > 0)
                 {
                     var cell = queue.Dequeue();
-                    component.Add(cell);
+                    cells.Add(cell);
 
                     foreach (var dir in Dirs4)
                     {
                         var neighbor = cell + dir;
                         if (!matched.Contains(neighbor)) continue;
                         if (visited.Contains(neighbor)) continue;
-                        if (GetColor(neighbor) != type) continue;
+                        if (GetColor(neighbor) != color) continue;
 
                         visited.Add(neighbor);
                         queue.Enqueue(neighbor);
                     }
                 }
 
-                groups.Add(new MatchGroup(component, type.Value));
+                components.Add(new MatchComponent(cells, color.Value));
             }
 
-            return groups;
+            return components;
         }
 
-        private HashSet<Vector2Int> BuildCheckSet(IEnumerable<Vector2Int> changedCells)
+        HashSet<Vector2Int> BuildCheckSet(IEnumerable<Vector2Int> changedCells)
         {
             var set = new HashSet<Vector2Int>();
             var size = _board.Size;
@@ -119,7 +128,7 @@ namespace Game
             return set;
         }
 
-        private void CheckLine(Vector2Int pos, Vector2Int dir, HashSet<Vector2Int> matched)
+        void CheckLine(Vector2Int pos, Vector2Int dir, HashSet<Vector2Int> matched)
         {
             var prev = pos - dir;
             if (_board.IsInBounds(prev))
@@ -146,7 +155,7 @@ namespace Game
                 foreach (var cell in run)
                     matched.Add(cell);
         }
-        
+
         void CheckSquare(Vector2Int pos, HashSet<Vector2Int> matched)
         {
             var c00 = pos;
@@ -170,8 +179,8 @@ namespace Game
             matched.Add(c01);
             matched.Add(c11);
         }
-        
-        private void TryAdd(HashSet<Vector2Int> set, Vector2Int pos)
+
+        void TryAdd(HashSet<Vector2Int> set, Vector2Int pos)
         {
             if (_board.IsInBounds(pos)) set.Add(pos);
         }

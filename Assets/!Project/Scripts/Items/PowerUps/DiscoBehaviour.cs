@@ -19,7 +19,7 @@ namespace Game
 
         public async UniTask Activate(ActivationContext activationContext, IBoardContext context)
         {
-            await _animator.PlayDiscoActivation(activationContext.Self);
+            await _animator.PlayDiscoActivation(((PlayfieldItem)activationContext.Self).View);
             
             var color = activationContext.SwappedColor ?? context.GetDominantColor();
             if (color == null) return;

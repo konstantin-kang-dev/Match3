@@ -1,17 +1,16 @@
 using System;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Game.Configs;
 using R3;
 using UnityEngine;
 
 namespace Game
 {
-    public class PlayfieldItem : IDisposable
+    public class PlayfieldItem : IBoardItem, IDisposable
     {
         private readonly GridManager _gridManager;
         private readonly ISwapRequester _swapRequester;
-
-        private PlayfieldItemView _view;
 
         private readonly CompositeDisposable _disposables = new();
         private readonly Subject<bool> _onDestroyed = new();
@@ -21,17 +20,18 @@ namespace Game
         public bool IsDisposed => _disposed;
         public bool IsActivating { get; private set; }
 
-        internal void SetActivating(bool value)
+        public void SetActivating(bool value)
         {
             IsActivating = value;
         }
+
         public PlayfieldItem(ISwapRequester swapRequester, GridManager gridManager)
         {
             _swapRequester = swapRequester;
             _gridManager = gridManager;
         }
 
-        public RectTransform RectTransform => _view.RectTransform;
+        public PlayfieldItemView View { get; private set; }
         public PlayfieldItemKind Kind { get; private set; }
         public PlayfieldItemColorType? Color { get; private set; }
         public IPowerUpBehaviour PowerUp { get; private set; }
@@ -55,24 +55,24 @@ namespace Game
             Color = config is ColoredItemConfig colored ? colored.Color : null;
             PowerUp = powerUp;
 
-            _view = view;
-            _view.Init(config);
-            _view.SetSize(_gridManager.CellSize);
+            View = view;
+            View.Init(config);
+            View.SetSize(_gridManager.CellSize);
 
             if (Kind == PlayfieldItemKind.Rocket)
             {
                 RocketBehaviour rocketBehaviour = powerUp as RocketBehaviour;
                 if (rocketBehaviour != null && rocketBehaviour.Orientation == RocketOrientation.Vertical)
                 {
-                    _view.SetAlternativeSprite(true);
+                    View.SetAlternativeSprite(true);
                 }
             }
 
-            _view.OnSwapRequest
+            View.OnSwapRequest
                 .Subscribe(HandleSwapRequest)
                 .AddTo(_disposables);
 
-            _view.OnDestroyed
+            View.OnDestroyed
                 .Subscribe(_ => Dispose())
                 .AddTo(_disposables);
         }
@@ -87,18 +87,10 @@ namespace Game
             OccupiedCell = cell;
         }
 
-        public void MoveTo(Vector2 targetPos, MoveAnimationType anim = MoveAnimationType.Move)
-        {
-            _view.MoveTo(targetPos, anim);
-        }
-
-        public void Hide() => _view.Hide();
-
-        public UniTask PlaySpawnAnimation() => _view.PlaySpawnAnimation();
-
         public void DestroyItem(DestroyMode mode)
         {
-            _view.Destroy(mode);
+            View.RectTransform.DOKill();
+            View.Destroy(mode);
         }
     }
 }

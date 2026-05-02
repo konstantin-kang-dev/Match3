@@ -67,34 +67,32 @@ namespace Game
 
         async UniTask PlayMergeAndSpawn(MatchGroup group, PowerUpSpawnPlan spawn)
         {
-            var items = new List<PlayfieldItem>();
+            var items = new List<IBoardItem>();
+            var views = new List<PlayfieldItemView>();
             var slots = new List<CellSlot>();
             foreach (var cell in group.Cells)
             {
                 var slot = _board.Get(cell);
-                if (slot.Item != null) items.Add(slot.Item);
+                if (slot.Item != null)
+                {
+                    items.Add(slot.Item);
+                    views.Add(((PlayfieldItem)slot.Item).View);
+                }
                 slots.Add(slot);
                 slot.SetDestroying();
             }
 
             Vector2 targetPos = _gridManager.GetPositionForCell(spawn.Cell);
-            await _powerUpAnimator.PlayMergeAnimation(items, targetPos);
+            await _powerUpAnimator.PlayMergeAnimation(views, targetPos);
 
             foreach (var item in items)
                 item.DestroyItem(DestroyMode.Instant);
 
-            
-            
             foreach (var slot in slots)
                 slot.ClearItem();
 
-            
-            
             ExecuteSpawn(spawn);
 
-            
-            
-            
             foreach (var slot in slots)
             {
                 if (slot.Position == spawn.Cell) continue;
@@ -189,14 +187,15 @@ namespace Game
 
         Vector2Int GetSpawnCell(MatchGroup group, Vector2Int? swapCell)
         {
-            if (swapCell.HasValue && group.Cells.Contains(swapCell.Value))
+            // Swap-cell приоритетен: если игрок свапнул фишку и она часть подформы — спавн там.
+            if (swapCell.HasValue && group.ShapeCells.Contains(swapCell.Value))
                 return swapCell.Value;
 
             return group.Shape switch
             {
-                MatchShape.Match5LT => CellGeometry.GetIntersection(group.Cells),
-                MatchShape.Match4Square => CellGeometry.GetBottomLeft(group.Cells),
-                _ => CellGeometry.GetCenter(group.Cells)
+                MatchShape.Match5LT => CellGeometry.GetIntersection(group.ShapeCells),
+                MatchShape.Match4Square => CellGeometry.GetBottomLeft(group.ShapeCells),
+                _ => CellGeometry.GetCenter(group.ShapeCells)
             };
         }
 
