@@ -28,5 +28,5 @@ public class PowerUpBehaviourFactory
             _activityTracker);
 
     public IPowerUpBehaviour CreateDisco(DiscoItemConfig config)
-        => new DiscoBehaviour(config.BeamSpeed ,_vfxService, _animator);
+        => new DiscoBehaviour(config.ActivationDuration ,_vfxService, _animator);
 }

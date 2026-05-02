@@ -130,9 +130,9 @@ namespace Game
             var startY = rt.anchoredPosition.y;
             var seq = DOTween.Sequence();
 
-            seq.Append(rt.DOAnchorPosY(startY + 40f, 0.2f).SetEase(Ease.OutCubic));
-            seq.Join(rt.DOScale(new Vector3(0.85f, 1.25f, 1f), 0.2f));
-            seq.AppendInterval(0.1f);
+            float targetAnchorPosY = rt.anchoredPosition.y + 50f;
+            seq.Append(rt.DOScale(new Vector3(1.5f, 1.5f, 1f), 0.25f).SetEase(Ease.InOutQuad));
+            seq.Join(rt.DOAnchorPosY(targetAnchorPosY, 0.25f).SetEase(Ease.InOutQuad));
 
             return seq.AsyncWaitForCompletion().AsUniTask();
         }

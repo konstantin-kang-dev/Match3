@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
@@ -6,13 +7,13 @@ namespace Game
 {   
     public class DiscoBehaviour : IPowerUpBehaviour
     {
-        private readonly float _beamSpeed;
+        private readonly float _activationDuration;
         private readonly IVfxService _vfxService;
         private readonly PowerUpAnimator _animator;
 
-        public DiscoBehaviour(float beamSpeed, IVfxService vfxService, PowerUpAnimator animator)
+        public DiscoBehaviour(float activationDuration, IVfxService vfxService, PowerUpAnimator animator)
         {
-            _beamSpeed = beamSpeed; 
+            _activationDuration = activationDuration; 
             _vfxService = vfxService;
             _animator = animator;
         }
@@ -24,8 +25,16 @@ namespace Game
             var color = activationContext.SwappedColor ?? context.GetDominantColor();
             if (color == null) return;
     
-            var cells = context.GetCellsByColor(color.Value);
-            await context.DestroyCells(cells, DestroyMode.Instant);
+            var cells = context.GetCellsByColor(color.Value).ToList();
+
+            float markInterval = _activationDuration / cells.Count;
+            
+            foreach (var cell in cells)
+            {
+                await UniTask.WaitForSeconds(markInterval);
+                await context.DestroyCells(new []{cell}, DestroyMode.Instant);
+            }
+            
         }
     }
 }

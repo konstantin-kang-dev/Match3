@@ -27,7 +27,6 @@ namespace Game
         
         public async UniTask Activate(ActivationContext activationContext, IBoardContext context)
         {
-            Debug.Log($"[RocketBehaviour] Activated origin: {activationContext.Origin}");
             await _animator.PlayRocketActivation(((PlayfieldItem)activationContext.Self).View);
             
             var origin = activationContext.Origin;
